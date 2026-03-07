@@ -4,7 +4,7 @@
         xmlns:vm="clr-namespace:Scour.App.ViewModels"
         xmlns:conv="clr-namespace:Scour.App.Converters"
         xmlns:core="clr-namespace:Scour.Core;assembly=Scour.Core"
-        Title="Scour" Icon="/scour.ico" Width="1100" Height="720" MinWidth="800" MinHeight="500"
+        Title="Scour" Icon="/scour.ico" Width="1100" Height="860" MinWidth="800" MinHeight="600"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource BaseBrush}"
         Foreground="{StaticResource TextBrush}"
@@ -53,7 +53,7 @@
                                    Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                         <TextBlock Text="Scour" FontWeight="Bold" FontSize="14"
                                    Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
-                        <TextBlock Text="  v0.2.0" FontSize="11"
+                        <TextBlock Text="  v0.3.0" FontSize="11"
                                    Foreground="{StaticResource Overlay1Brush}" VerticalAlignment="Center"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -125,31 +125,43 @@
                                          IsChecked="{Binding DeleteMode, Converter={StaticResource EnumBoolConverter}, ConverterParameter={x:Static core:DeleteMode.Simulate}}"/>
                         </StackPanel>
 
+                        <!-- Integration -->
+                        <StackPanel DockPanel.Dock="Top" Margin="12,12,12,0">
+                            <TextBlock Text="INTEGRATION" FontSize="10" FontWeight="Bold" Margin="4,0,0,8"
+                                       Foreground="{StaticResource Overlay1Brush}"/>
+                            <CheckBox Content="Explorer context menu" IsChecked="{Binding ContextMenuRegistered, Mode=OneWay}"
+                                      Foreground="{StaticResource TextBrush}" Margin="4,4"
+                                      Command="{Binding ToggleContextMenuCommand}" ToolTip="Add 'Scan with Scour' to right-click menu"/>
+                        </StackPanel>
+
                         <!-- Separator -->
                         <Border DockPanel.Dock="Top" Height="1" Background="{StaticResource Surface0Brush}" Margin="12,12,12,8"/>
 
                         <!-- Scanner nav buttons -->
-                        <StackPanel DockPanel.Dock="Top" Margin="0,4,0,0">
-                            <TextBlock Text="SCANNERS" FontSize="10" FontWeight="Bold" Margin="16,0,0,8"
-                                       Foreground="{StaticResource Overlay1Brush}"/>
-                            <ItemsControl ItemsSource="{Binding Scanners}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <RadioButton GroupName="Scanners"
-                                                     IsChecked="{Binding IsSelected, RelativeSource={RelativeSource Self}}"
-                                                     Checked="ScannerNav_Checked"
-                                                     Tag="{Binding}"
-                                                     Style="{StaticResource NavButton}">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding IconGlyph}" FontFamily="Segoe MDL2 Assets"
-                                                           FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
-                                            </StackPanel>
-                                        </RadioButton>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
+                        <ScrollViewer DockPanel.Dock="Top" VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled" Margin="0,4,0,0">
+                            <StackPanel>
+                                <TextBlock Text="SCANNERS" FontSize="10" FontWeight="Bold" Margin="16,0,0,8"
+                                           Foreground="{StaticResource Overlay1Brush}"/>
+                                <ItemsControl ItemsSource="{Binding Scanners}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <RadioButton GroupName="Scanners"
+                                                         IsChecked="{Binding IsSelected, RelativeSource={RelativeSource Self}}"
+                                                         Checked="ScannerNav_Checked"
+                                                         Tag="{Binding}"
+                                                         Style="{StaticResource NavButton}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding IconGlyph}" FontFamily="Segoe MDL2 Assets"
+                                                               FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </RadioButton>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
 
                         <!-- Scan buttons at bottom -->
                         <StackPanel DockPanel.Dock="Bottom" Margin="12,0,12,12" VerticalAlignment="Bottom">
