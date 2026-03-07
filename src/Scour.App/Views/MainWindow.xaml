@@ -1,0 +1,348 @@
+<Window x:Class="Scour.App.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Scour.App.ViewModels"
+        xmlns:conv="clr-namespace:Scour.App.Converters"
+        xmlns:core="clr-namespace:Scour.Core;assembly=Scour.Core"
+        Title="Scour" Width="1100" Height="720" MinWidth="800" MinHeight="500"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BaseBrush}"
+        Foreground="{StaticResource TextBrush}"
+        FontFamily="Segoe UI" FontSize="13"
+        WindowStyle="None" AllowsTransparency="True"
+        ResizeMode="CanResizeWithGrip"
+        AllowDrop="True" Drop="Window_Drop" DragOver="Window_DragOver">
+
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+
+    <Window.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
+        <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis"/>
+        <conv:EnumBoolConverter x:Key="EnumBoolConverter"/>
+        <conv:StringToVisibilityConverter x:Key="StringToVisConverter"/>
+        <conv:IntToVisibilityConverter x:Key="IntToVisConverter"/>
+        <conv:GroupColorConverter x:Key="GroupColorConverter"/>
+    </Window.Resources>
+
+    <Window.InputBindings>
+        <KeyBinding Key="F5" Command="{Binding ScanActiveCommand}"/>
+        <KeyBinding Key="Escape" Command="{Binding CancelActiveCommand}"/>
+        <KeyBinding Key="A" Modifiers="Ctrl" Command="{Binding ActiveScanner.SelectAllCommand}"/>
+        <KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding ActiveScanner.SelectNoneCommand}"/>
+        <KeyBinding Key="I" Modifiers="Ctrl" Command="{Binding ActiveScanner.InvertSelectionCommand}"/>
+        <KeyBinding Key="E" Modifiers="Ctrl" Command="{Binding ExportCsvCommand}"/>
+        <KeyBinding Key="Delete" Command="{Binding DeleteActiveCommand}"/>
+    </Window.InputBindings>
+
+    <Border Background="{StaticResource CrustBrush}" CornerRadius="10" BorderBrush="{StaticResource Surface0Brush}" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>  <!-- Title bar -->
+                <RowDefinition Height="*"/>   <!-- Content -->
+                <RowDefinition Height="32"/>  <!-- Status bar -->
+            </Grid.RowDefinitions>
+
+            <!-- Custom Title Bar -->
+            <Border Grid.Row="0" Background="{StaticResource MantleBrush}" CornerRadius="10,10,0,0"
+                    MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="14,0,0,0">
+                        <TextBlock Text="&#xE8FD;" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                                   Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Text="Scour" FontWeight="Bold" FontSize="14"
+                                   Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                        <TextBlock Text="  v0.2.0" FontSize="11"
+                                   Foreground="{StaticResource Overlay1Brush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="&#xE921;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                                Style="{StaticResource SubtleButton}" Padding="14,0" Height="40" Click="MinimizeButton_Click"
+                                Background="Transparent" ToolTip="Minimize"/>
+                        <Button x:Name="btnMaxRestore" Content="&#xE922;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                                Style="{StaticResource SubtleButton}" Padding="14,0" Height="40" Click="MaximizeButton_Click"
+                                Background="Transparent" ToolTip="Maximize"/>
+                        <Button Content="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                                Style="{StaticResource SubtleButton}" Padding="14,0" Height="40" Click="CloseButton_Click"
+                                Background="Transparent" ToolTip="Close"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Main Content -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="230"/>  <!-- Sidebar -->
+                    <ColumnDefinition Width="*"/>    <!-- Scanner content -->
+                </Grid.ColumnDefinitions>
+
+                <!-- Sidebar -->
+                <Border Grid.Column="0" Background="{StaticResource MantleBrush}"
+                        BorderBrush="{StaticResource Surface0Brush}" BorderThickness="0,0,1,0">
+                    <DockPanel>
+                        <!-- Path selector at top -->
+                        <StackPanel DockPanel.Dock="Top" Margin="12,12,12,0">
+                            <TextBlock Text="SCAN PATH" FontSize="10" FontWeight="Bold" Margin="4,0,0,6"
+                                       Foreground="{StaticResource Overlay1Brush}"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" Text="{Binding RootPath, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource DarkTextBox}" FontSize="11"/>
+                                <Button Grid.Column="1" Content="..." Margin="4,0,0,0"
+                                        Style="{StaticResource SubtleButton}" Padding="10,8"
+                                        Command="{Binding BrowseCommand}"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Settings -->
+                        <StackPanel DockPanel.Dock="Top" Margin="12,16,12,0">
+                            <TextBlock Text="OPTIONS" FontSize="10" FontWeight="Bold" Margin="4,0,0,8"
+                                       Foreground="{StaticResource Overlay1Brush}"/>
+                            <CheckBox Content="Skip hidden folders" IsChecked="{Binding SkipHidden}"
+                                      Foreground="{StaticResource TextBrush}" Margin="4,4"/>
+                            <CheckBox Content="Skip system folders" IsChecked="{Binding SkipSystem}"
+                                      Foreground="{StaticResource TextBrush}" Margin="4,4"/>
+                            <CheckBox Content="Ignore 0 KB files" IsChecked="{Binding Ignore0Kb}"
+                                      Foreground="{StaticResource TextBrush}" Margin="4,4"/>
+                        </StackPanel>
+
+                        <!-- Delete Mode -->
+                        <StackPanel DockPanel.Dock="Top" Margin="12,12,12,0">
+                            <TextBlock Text="DELETE MODE" FontSize="10" FontWeight="Bold" Margin="4,0,0,8"
+                                       Foreground="{StaticResource Overlay1Brush}"/>
+                            <RadioButton Content="Recycle Bin" GroupName="DeleteMode" Margin="4,3"
+                                         Foreground="{StaticResource TextBrush}"
+                                         IsChecked="{Binding DeleteMode, Converter={StaticResource EnumBoolConverter}, ConverterParameter={x:Static core:DeleteMode.RecycleBin}}"/>
+                            <RadioButton Content="Permanent" GroupName="DeleteMode" Margin="4,3"
+                                         Foreground="{StaticResource RedBrush}"
+                                         IsChecked="{Binding DeleteMode, Converter={StaticResource EnumBoolConverter}, ConverterParameter={x:Static core:DeleteMode.Permanent}}"/>
+                            <RadioButton Content="Simulate" GroupName="DeleteMode" Margin="4,3"
+                                         Foreground="{StaticResource Overlay1Brush}"
+                                         IsChecked="{Binding DeleteMode, Converter={StaticResource EnumBoolConverter}, ConverterParameter={x:Static core:DeleteMode.Simulate}}"/>
+                        </StackPanel>
+
+                        <!-- Separator -->
+                        <Border DockPanel.Dock="Top" Height="1" Background="{StaticResource Surface0Brush}" Margin="12,12,12,8"/>
+
+                        <!-- Scanner nav buttons -->
+                        <StackPanel DockPanel.Dock="Top" Margin="0,4,0,0">
+                            <TextBlock Text="SCANNERS" FontSize="10" FontWeight="Bold" Margin="16,0,0,8"
+                                       Foreground="{StaticResource Overlay1Brush}"/>
+                            <ItemsControl ItemsSource="{Binding Scanners}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <RadioButton GroupName="Scanners"
+                                                     IsChecked="{Binding IsSelected, RelativeSource={RelativeSource Self}}"
+                                                     Checked="ScannerNav_Checked"
+                                                     Tag="{Binding}"
+                                                     Style="{StaticResource NavButton}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding IconGlyph}" FontFamily="Segoe MDL2 Assets"
+                                                           FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </RadioButton>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+
+                        <!-- Scan buttons at bottom -->
+                        <StackPanel DockPanel.Dock="Bottom" Margin="12,0,12,12" VerticalAlignment="Bottom">
+                            <Button Content="Scan" Style="{StaticResource ActionButton}"
+                                    Command="{Binding ScanActiveCommand}"
+                                    HorizontalAlignment="Stretch" Padding="0,10"
+                                    ToolTip="F5"/>
+                            <Button Content="Scan All" Style="{StaticResource SubtleButton}" Margin="0,6,0,0"
+                                    Command="{Binding ScanAllCommand}"
+                                    HorizontalAlignment="Stretch" Padding="0,8" FontSize="11"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+                <!-- Scanner Content Area -->
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>  <!-- Toolbar -->
+                        <RowDefinition Height="Auto"/>  <!-- Filter + Progress -->
+                        <RowDefinition Height="*"/>     <!-- Results grid -->
+                    </Grid.RowDefinitions>
+
+                    <!-- Toolbar -->
+                    <Border Grid.Row="0" Background="{StaticResource BaseBrush}" Padding="16,10">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding ActiveScanner.IconGlyph}" FontFamily="Segoe MDL2 Assets"
+                                           FontSize="18" Foreground="{StaticResource AccentBrush}"
+                                           VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <TextBlock Text="{Binding ActiveScanner.Name}" FontSize="18" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding ActiveScanner.Description}" FontSize="12"
+                                           Foreground="{StaticResource Overlay1Brush}"
+                                           VerticalAlignment="Center" Margin="14,2,0,0"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <Button Content="Select All" Style="{StaticResource SubtleButton}" Margin="4,0"
+                                        Padding="10,6" FontSize="11"
+                                        Command="{Binding ActiveScanner.SelectAllCommand}" ToolTip="Ctrl+A"/>
+                                <Button Content="Select None" Style="{StaticResource SubtleButton}" Margin="4,0"
+                                        Padding="10,6" FontSize="11"
+                                        Command="{Binding ActiveScanner.SelectNoneCommand}" ToolTip="Ctrl+D"/>
+                                <Button Content="Invert" Style="{StaticResource SubtleButton}" Margin="4,0"
+                                        Padding="10,6" FontSize="11"
+                                        Command="{Binding ActiveScanner.InvertSelectionCommand}" ToolTip="Ctrl+I"/>
+                                <Border Width="1" Background="{StaticResource Surface1Brush}" Margin="8,2"/>
+                                <Button Content="CSV" Style="{StaticResource SubtleButton}" Margin="4,0"
+                                        Padding="10,6" FontSize="11"
+                                        Command="{Binding ExportCsvCommand}" ToolTip="Export CSV (Ctrl+E)"/>
+                                <Button Content="JSON" Style="{StaticResource SubtleButton}" Margin="4,0"
+                                        Padding="10,6" FontSize="11"
+                                        Command="{Binding ExportJsonCommand}" ToolTip="Export JSON"/>
+                                <Border Width="1" Background="{StaticResource Surface1Brush}" Margin="8,2"/>
+                                <Button Content="Cancel" Style="{StaticResource SubtleButton}" Margin="4,0"
+                                        Padding="10,6" FontSize="11"
+                                        Command="{Binding CancelActiveCommand}" ToolTip="Escape"
+                                        Visibility="{Binding ActiveScanner.IsScanning, Converter={StaticResource BoolToVis}}"/>
+                                <Button Content="&#xE74D; Delete Selected" Style="{StaticResource ActionButton}" Margin="4,0"
+                                        Padding="14,6" FontSize="11" Background="{StaticResource RedBrush}"
+                                        Command="{Binding DeleteActiveCommand}" ToolTip="Delete"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Filter + Progress -->
+                    <StackPanel Grid.Row="1" Margin="16,0,16,4">
+                        <!-- Filter bar -->
+                        <Grid Margin="0,4,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="&#xE721;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                       Foreground="{StaticResource Overlay1Brush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBox Grid.Column="1" Text="{Binding ActiveScanner.FilterText, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource DarkTextBox}" FontSize="11" Padding="8,6"
+                                     Tag="Filter results by name, path, or detail..."/>
+                        </Grid>
+                        <!-- Progress Bar -->
+                        <ProgressBar Height="3" Style="{StaticResource DarkProgressBar}"
+                                     Value="{Binding ActiveScanner.Progress, Mode=OneWay}"
+                                     IsIndeterminate="{Binding ActiveScanner.IsIndeterminate, Mode=OneWay}"
+                                     Maximum="100"/>
+                    </StackPanel>
+
+                    <!-- Results DataGrid -->
+                    <DataGrid Grid.Row="2" x:Name="dgResults"
+                              ItemsSource="{Binding ActiveScanner.FilteredResults}"
+                              Style="{StaticResource DarkDataGrid}"
+                              ColumnHeaderStyle="{StaticResource DarkColumnHeader}"
+                              CellStyle="{StaticResource DarkDataGridCell}"
+                              Margin="16,0,16,8"
+                              Background="Transparent"
+                              CanUserSortColumns="True"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling"
+                              EnableRowVirtualization="True"
+                              ScrollViewer.CanContentScroll="True">
+                        <DataGrid.ContextMenu>
+                            <ContextMenu Background="{StaticResource Surface0Brush}" Foreground="{StaticResource TextBrush}"
+                                         BorderBrush="{StaticResource Surface1Brush}"
+                                         DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                <MenuItem Header="Open file location"
+                                          Command="{Binding ActiveScanner.OpenFileLocationCommand}"
+                                          CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                <MenuItem Header="Copy path"
+                                          Command="{Binding ActiveScanner.CopyPathCommand}"
+                                          CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                <Separator Background="{StaticResource Surface1Brush}"/>
+                                <MenuItem Header="Remove from list"
+                                          Command="{Binding ActiveScanner.RemoveFromListCommand}"
+                                          CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
+                                                    Width="36" Header=""/>
+                            <DataGridTextColumn Binding="{Binding Name}" Header="Name" Width="200" SortDirection="Ascending"/>
+                            <DataGridTextColumn Binding="{Binding FullPath}" Header="Path" Width="*"/>
+                            <DataGridTextColumn Binding="{Binding SizeFormatted}" Header="Size" Width="80"
+                                                SortMemberPath="SizeBytes">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextAlignment" Value="Right"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Binding="{Binding ModifiedFormatted}" Header="Modified" Width="130"
+                                                SortMemberPath="Modified"/>
+                            <DataGridTextColumn Binding="{Binding Detail}" Header="Detail" Width="120"/>
+                            <DataGridTextColumn Binding="{Binding Group}" Header="Group" Width="80"/>
+                        </DataGrid.Columns>
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow" BasedOn="{StaticResource DarkDataGridRow}">
+                                <Setter Property="Background" Value="{Binding Group, Converter={StaticResource GroupColorConverter}}"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="{StaticResource Surface0Brush}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="{StaticResource Surface1Brush}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+
+                    <!-- Empty state -->
+                    <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Visibility="{Binding ActiveScanner.HasResults, Converter={StaticResource InvBoolToVis}}"
+                                IsHitTestVisible="False">
+                        <TextBlock Text="{Binding ActiveScanner.IconGlyph}" FontFamily="Segoe MDL2 Assets"
+                                   FontSize="48" Foreground="{StaticResource Surface2Brush}"
+                                   HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                        <TextBlock Text="No results yet" FontSize="16" Foreground="{StaticResource Overlay0Brush}"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="Select a folder and press F5 or click Scan to begin" FontSize="12"
+                                   Foreground="{StaticResource Surface2Brush}" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+
+            <!-- Status Bar -->
+            <Border Grid.Row="2" Background="{StaticResource MantleBrush}" CornerRadius="0,0,10,10"
+                    BorderBrush="{StaticResource Surface0Brush}" BorderThickness="0,1,0,0">
+                <Grid Margin="14,0">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding ActiveScanner.StatusText}" FontSize="11"
+                                   Foreground="{StaticResource Subtext0Brush}"/>
+                        <TextBlock Text="{Binding ActiveScanner.ElapsedTime, StringFormat=' [{0}]'}" FontSize="11"
+                                   Foreground="{StaticResource Overlay0Brush}"
+                                   Visibility="{Binding ActiveScanner.ElapsedTime, Converter={StaticResource StringToVisConverter}}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <TextBlock FontSize="11" Foreground="{StaticResource PeachBrush}" Margin="0,0,12,0"
+                                   Visibility="{Binding ActiveScanner.ErrorCount, Converter={StaticResource IntToVisConverter}}">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0} errors">
+                                    <Binding Path="ActiveScanner.ErrorCount"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                        <TextBlock FontSize="11" Foreground="{StaticResource Overlay1Brush}">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0} selected ({1})">
+                                    <Binding Path="ActiveScanner.SelectedCount"/>
+                                    <Binding Path="ActiveScanner.SelectedSizeFormatted"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>
