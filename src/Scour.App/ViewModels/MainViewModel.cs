@@ -80,6 +80,14 @@ public class MainViewModel : ViewModelBase
     public ICommand ExportJsonCommand { get; }
     public ICommand AddExcludeDirCommand { get; }
     public ICommand RemoveExcludeDirCommand { get; }
+    public ICommand ToggleContextMenuCommand { get; }
+
+    private bool _contextMenuRegistered;
+    public bool ContextMenuRegistered
+    {
+        get => _contextMenuRegistered;
+        set => SetProperty(ref _contextMenuRegistered, value);
+    }
 
     public MainViewModel()
     {
@@ -96,6 +104,8 @@ public class MainViewModel : ViewModelBase
         foreach (var dir in _settings.ExcludedDirectories)
             ExcludedDirectories.Add(dir);
 
+        _contextMenuRegistered = ContextMenuService.IsRegistered();
+
         // Register all scanner modules
         IScannerModule[] modules =
         [
@@ -106,6 +116,11 @@ public class MainViewModel : ViewModelBase
             new ZeroLengthFileScanner(),
             new OldFileScanner(),
             new BrokenSymlinkScanner(),
+            new BrokenShortcutScanner(),
+            new LongPathScanner(),
+            new LockedFileScanner(),
+            new DuplicateArchiveScanner(),
+            new OrphanedAppDataScanner(),
         ];
 
         foreach (var m in modules)
@@ -122,6 +137,7 @@ public class MainViewModel : ViewModelBase
         ExportJsonCommand = new RelayCommand(_ => DoExportJson(), _ => ActiveScanner?.HasResults ?? false);
         AddExcludeDirCommand = new RelayCommand(_ => DoAddExcludeDir());
         RemoveExcludeDirCommand = new RelayCommand(DoRemoveExcludeDir);
+        ToggleContextMenuCommand = new RelayCommand(_ => DoToggleContextMenu());
     }
 
     public void SaveSettings()
@@ -289,5 +305,19 @@ public class MainViewModel : ViewModelBase
     {
         _settings.ExcludedDirectories = [.. ExcludedDirectories];
         _settings.Save();
+    }
+
+    private void DoToggleContextMenu()
+    {
+        if (ContextMenuRegistered)
+        {
+            ContextMenuService.Unregister();
+            ContextMenuRegistered = false;
+        }
+        else
+        {
+            ContextMenuService.Register();
+            ContextMenuRegistered = true;
+        }
     }
 }

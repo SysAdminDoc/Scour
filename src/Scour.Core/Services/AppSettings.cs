@@ -21,7 +21,7 @@ public class AppSettings
         "desktop.ini", "Thumbs.db", ".DS_Store", "._*"
     ];
     public double WindowWidth { get; set; } = 1100;
-    public double WindowHeight { get; set; } = 720;
+    public double WindowHeight { get; set; } = 860;
     public double WindowLeft { get; set; } = double.NaN;
     public double WindowTop { get; set; } = double.NaN;
 
