@@ -20,7 +20,7 @@ public sealed class DuplicateArchiveScanner : ScannerBase
     private static readonly HashSet<string> ArchiveExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
         ".zip", ".7z", ".rar", ".tar", ".gz", ".tgz", ".bz2", ".xz",
-        ".tar.gz", ".tar.bz2", ".tar.xz", ".cab", ".iso"
+        ".cab", ".iso"
     };
 
     public override IReadOnlyList<ColumnDefinition> ResultColumns =>

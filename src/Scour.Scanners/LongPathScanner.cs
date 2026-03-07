@@ -74,6 +74,7 @@ public sealed class LongPathScanner : ScannerBase
                             Modified = entry.LastWriteTime,
                             Detail = entry.FullPath.Length.ToString(),
                             Group = "Directory",
+                            IsSelected = false,
                         });
                     }
 
@@ -93,6 +94,7 @@ public sealed class LongPathScanner : ScannerBase
                         Modified = entry.LastWriteTime,
                         Detail = entry.FullPath.Length.ToString(),
                         Group = "File",
+                        IsSelected = false,
                     });
                 }
             }

@@ -310,14 +310,11 @@ public class MainViewModel : ViewModelBase
     private void DoToggleContextMenu()
     {
         if (ContextMenuRegistered)
-        {
             ContextMenuService.Unregister();
-            ContextMenuRegistered = false;
-        }
         else
-        {
             ContextMenuService.Register();
-            ContextMenuRegistered = true;
-        }
+
+        // Verify actual registry state rather than assuming success
+        ContextMenuRegistered = ContextMenuService.IsRegistered();
     }
 }

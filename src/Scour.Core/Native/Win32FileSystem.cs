@@ -135,11 +135,11 @@ public static class Win32FileSystem
     }
 
     /// <summary>
-    /// Permanently delete a directory (must be empty).
+    /// Permanently delete a directory and all its contents.
     /// </summary>
     public static void DeleteDirectory(string path)
     {
-        Directory.Delete(EnsureLongPath(path), false);
+        Directory.Delete(EnsureLongPath(path), true);
     }
 
     /// <summary>

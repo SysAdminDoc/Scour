@@ -91,16 +91,17 @@ public sealed class BrokenShortcutScanner : ScannerBase
 
     private static string? ResolveShortcutTarget(string lnkPath)
     {
+        object? shellLink = null;
         try
         {
-            var link = (IShellLink)new ShellLink();
+            shellLink = new ShellLink();
+            var link = (IShellLink)shellLink;
             var file = (IPersistFile)link;
             file.Load(lnkPath, 0); // STGM_READ
 
             // Don't resolve - just read the stored path (faster, no UI prompts)
             var sb = new char[1024];
-            WIN32_FIND_DATAW data;
-            link.GetPath(sb, sb.Length, out data, 0x04); // SLGP_RAWPATH
+            link.GetPath(sb, sb.Length, out _, 0x04); // SLGP_RAWPATH
 
             var target = new string(sb).TrimEnd('\0');
             if (string.IsNullOrWhiteSpace(target)) return null;
@@ -112,6 +113,11 @@ public sealed class BrokenShortcutScanner : ScannerBase
         catch
         {
             return null;
+        }
+        finally
+        {
+            if (shellLink != null)
+                Marshal.ReleaseComObject(shellLink);
         }
     }
 
