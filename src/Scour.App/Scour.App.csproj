@@ -5,6 +5,10 @@
     <ProjectReference Include="..\Scour.Scanners\Scour.Scanners.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Resource Include="scour.ico" />
+  </ItemGroup>
+
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0-windows</TargetFramework>
