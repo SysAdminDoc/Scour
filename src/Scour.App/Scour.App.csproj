@@ -11,6 +11,13 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>scour.ico</ApplicationIcon>
+    <Version>0.2.0</Version>
+    <AssemblyTitle>Scour</AssemblyTitle>
+    <Description>Multi-function file cleanup tool for Windows</Description>
+    <Company>SysAdminDoc</Company>
+    <Product>Scour</Product>
+    <Copyright>Copyright (c) 2026 SysAdminDoc</Copyright>
   </PropertyGroup>
 
 </Project>
