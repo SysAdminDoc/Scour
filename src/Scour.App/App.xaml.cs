@@ -10,16 +10,15 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        var window = new MainWindow();
+
         // Handle --scan "path" from context menu integration
         if (e.Args.Length >= 2 && e.Args[0] == "--scan")
         {
-            var scanPath = e.Args[1];
-            var window = new MainWindow();
             if (window.DataContext is MainViewModel vm)
-            {
-                vm.SetRootPath(scanPath);
-            }
-            window.Show();
+                vm.SetRootPath(e.Args[1]);
         }
+
+        window.Show();
     }
 }
