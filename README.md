@@ -1,11 +1,11 @@
 # Scour
 
-![Version](https://img.shields.io/badge/version-0.2.0-CBA6F7?style=flat-square)
+![Version](https://img.shields.io/badge/version-0.3.0-CBA6F7?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Windows-blue?style=flat-square)
 ![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 
-A high-performance disk cleanup utility for Windows. Scour uses Win32 native filesystem APIs to scan millions of files fast, then helps you identify and remove wasted space across 7 different scanner types.
+A high-performance disk cleanup utility for Windows. Scour uses Win32 native filesystem APIs and NTFS MFT direct reading to scan millions of files fast, then helps you identify and remove wasted space across 12 different scanner types.
 
 Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to install.
 
@@ -13,7 +13,7 @@ Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to in
 
 ## Features
 
-### 7 Built-in Scanners
+### 12 Built-in Scanners
 | Scanner | Description |
 |---------|-------------|
 | **Empty Folders** | Bottom-up detection of truly empty directories (handles nested empties) |
@@ -23,9 +23,15 @@ Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to in
 | **Zero-Length Files** | Find 0-byte empty files cluttering your filesystem |
 | **Old Files** | Files not modified in 365+ days |
 | **Broken Links** | Broken symbolic links and junctions |
+| **Broken Shortcuts** | Windows .lnk shortcuts pointing to deleted targets (COM IShellLink) |
+| **Long Paths** | Files/folders with paths exceeding 260 chars (MAX_PATH) |
+| **Locked Files** | Files that can't be opened (locked by processes, permission denied) |
+| **Duplicate Archives** | .zip/.7z/.rar files sitting next to their already-extracted contents |
+| **Orphaned App Data** | Leftover AppData/ProgramData/Program Files from uninstalled programs |
 
 ### Performance
 - **Win32 P/Invoke** (`FindFirstFileW`/`FindNextFileW`) bypasses .NET System.IO overhead
+- **NTFS MFT reader** - direct Master File Table enumeration via USN journal for instant volume-wide indexing (admin required)
 - **Parallel directory walking** at shallow depths with `Parallel.ForEachAsync`
 - **Partial hash optimization** - only full-hashes files that collide on 4KB prefix hash
 - **DataGrid virtualization** for smooth scrolling through large result sets
@@ -40,10 +46,11 @@ Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to in
 - **Export** to CSV or JSON
 - **Sortable columns** with proper numeric/date sorting
 - **Duplicate group coloring** - subtle tinted row backgrounds per duplicate group
-- **Scan All** - run all 7 scanners in parallel with one click
+- **Scan All** - run all 12 scanners in parallel with one click
 - **Selected size summary** - status bar shows count and total size of selected items
 - **Scan duration** and error count in status bar
 - **Settings persistence** - all options, window position, and excluded directories saved to `%LOCALAPPDATA%\Scour\settings.json`
+- **Windows Explorer context menu** - right-click any folder and select "Scan with Scour"
 
 ### Delete Modes
 - **Recycle Bin** (default) - uses `SHFileOperation` with `FOF_ALLOWUNDO`
@@ -83,9 +90,9 @@ Scour/
     Scour.Core/           # Core library - models, interfaces, services
       Interfaces/         # IScannerModule contract
       Models/             # ScanConfig, ScanResultItem, DeleteMode
-      Native/             # Win32 P/Invoke (FindFirstFileW, SHFileOperation)
-      Services/           # FileSystemWalker, FileHasher, DeletionService, AppSettings
-    Scour.Scanners/       # Scanner implementations
+      Native/             # Win32 P/Invoke, NTFS MFT reader
+      Services/           # FileSystemWalker, FileHasher, DeletionService, AppSettings, ContextMenuService
+    Scour.Scanners/       # Scanner implementations (12 modules)
       ScannerBase.cs      # Shared base class (deletion, reset)
       EmptyDirectoryScanner.cs
       DuplicateFileScanner.cs
@@ -94,6 +101,11 @@ Scour/
       ZeroLengthFileScanner.cs
       OldFileScanner.cs
       BrokenSymlinkScanner.cs
+      BrokenShortcutScanner.cs
+      LongPathScanner.cs
+      LockedFileScanner.cs
+      DuplicateArchiveScanner.cs
+      OrphanedAppDataScanner.cs
     Scour.App/            # WPF desktop application
       Views/              # MainWindow XAML + code-behind
       ViewModels/         # MainViewModel, ScannerViewModel, ViewModelBase
@@ -110,6 +122,9 @@ Scour/
 - **`IProgress<ScanProgress>`** for real-time UI updates during scans
 - **`CancellationToken`** throughout for responsive cancellation
 - **`ListCollectionView`** for real-time filtering without re-scanning
+- **NTFS MFT** direct reading via `FSCTL_ENUM_USN_DATA` for volume-wide file indexing
+- **COM IShellLink** interop for parsing Windows shortcut (.lnk) targets
+- **Registry-based** orphaned app detection cross-referencing installed programs
 
 ## Excluded Directories (Default)
 
