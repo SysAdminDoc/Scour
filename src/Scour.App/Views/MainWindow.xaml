@@ -4,7 +4,7 @@
         xmlns:vm="clr-namespace:Scour.App.ViewModels"
         xmlns:conv="clr-namespace:Scour.App.Converters"
         xmlns:core="clr-namespace:Scour.Core;assembly=Scour.Core"
-        Title="Scour" Width="1100" Height="720" MinWidth="800" MinHeight="500"
+        Title="Scour" Icon="/scour.ico" Width="1100" Height="720" MinWidth="800" MinHeight="500"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource BaseBrush}"
         Foreground="{StaticResource TextBrush}"
