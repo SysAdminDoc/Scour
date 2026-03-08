@@ -67,7 +67,7 @@ public sealed class TempFileScanner : ScannerBase
                     var reason = GetTempReason(entry);
                     if (reason != null)
                     {
-                        _results.Add(new ScanResultItem
+                        AddResult(new ScanResultItem
                         {
                             FullPath = entry.FullPath,
                             Name = entry.Name,

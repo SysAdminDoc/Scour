@@ -1,8 +1,10 @@
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Threading;
 using Scour.Core;
 using Scour.Core.Interfaces;
 
@@ -14,6 +16,8 @@ public class ScannerViewModel : ViewModelBase
     private CancellationTokenSource? _cts;
     private readonly Stopwatch _stopwatch = new();
     private readonly object _resultsLock = new();
+    private readonly ConcurrentQueue<ScanResultItem> _streamQueue = new();
+    private DispatcherTimer? _streamTimer;
 
     public IScannerModule Scanner => _scanner;
     public string Name => _scanner.Name;
@@ -35,6 +39,17 @@ public class ScannerViewModel : ViewModelBase
 
     private bool _hasResults;
     public bool HasResults { get => _hasResults; set => SetProperty(ref _hasResults, value); }
+
+    private bool _isGrouped;
+    public bool IsGrouped
+    {
+        get => _isGrouped;
+        set
+        {
+            if (SetProperty(ref _isGrouped, value))
+                ApplyGrouping();
+        }
+    }
 
     public bool CanScan => !IsScanning;
 
@@ -76,6 +91,7 @@ public class ScannerViewModel : ViewModelBase
     public ICommand OpenFileLocationCommand { get; }
     public ICommand CopyPathCommand { get; }
     public ICommand RemoveFromListCommand { get; }
+    public ICommand ToggleGroupCommand { get; }
 
     public ScannerViewModel(IScannerModule scanner)
     {
@@ -89,6 +105,7 @@ public class ScannerViewModel : ViewModelBase
         OpenFileLocationCommand = new RelayCommand(DoOpenFileLocation);
         CopyPathCommand = new RelayCommand(DoCopyPath);
         RemoveFromListCommand = new RelayCommand(DoRemoveFromList);
+        ToggleGroupCommand = new RelayCommand(_ => IsGrouped = !IsGrouped);
 
         Results.CollectionChanged += (_, e) =>
         {
@@ -117,6 +134,17 @@ public class ScannerViewModel : ViewModelBase
         StatusText = "Scanning...";
         _stopwatch.Restart();
 
+        // Set up streaming callback
+        _scanner.OnItemFound = item => _streamQueue.Enqueue(item);
+
+        // Start timer to drain queue to UI
+        _streamTimer = new DispatcherTimer(DispatcherPriority.Background)
+        {
+            Interval = TimeSpan.FromMilliseconds(150)
+        };
+        _streamTimer.Tick += (_, _) => DrainStreamQueue();
+        _streamTimer.Start();
+
         var progressHandler = new Progress<ScanProgress>(p =>
         {
             StatusText = p.Status;
@@ -132,30 +160,74 @@ public class ScannerViewModel : ViewModelBase
         {
             await _scanner.ScanAsync(BuildConfig, progressHandler, _cts.Token);
 
-            Application.Current.Dispatcher.Invoke(() =>
+            // Final drain - pick up any remaining items
+            _streamTimer.Stop();
+            DrainStreamQueue();
+
+            // For scanners that sort after scanning, re-sync from scanner's ordered results
+            if (_scanner.Results.Count != Results.Count || NeedsResync())
             {
-                foreach (var item in _scanner.Results)
-                    Results.Add(item);
-                HasResults = Results.Count > 0;
-                UpdateSelectedCount();
-            });
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Results.Clear();
+                    foreach (var item in _scanner.Results)
+                        Results.Add(item);
+                });
+            }
+
+            HasResults = Results.Count > 0;
+            UpdateSelectedCount();
         }
         catch (OperationCanceledException)
         {
+            _streamTimer.Stop();
+            DrainStreamQueue();
             StatusText = "Scan cancelled";
         }
         catch (Exception ex)
         {
+            _streamTimer.Stop();
             StatusText = $"Error: {ex.Message}";
         }
         finally
         {
+            _streamTimer.Stop();
+            _streamTimer = null;
+            _scanner.OnItemFound = null;
             _stopwatch.Stop();
             IsScanning = false;
             IsIndeterminate = false;
             Progress = 100;
             ElapsedTime = _stopwatch.Elapsed.ToString(@"mm\:ss\.f");
         }
+    }
+
+    private void DrainStreamQueue()
+    {
+        var batch = 0;
+        while (_streamQueue.TryDequeue(out var item) && batch < 500)
+        {
+            Results.Add(item);
+            batch++;
+        }
+        if (batch > 0)
+            HasResults = true;
+    }
+
+    /// Check if the scanner's final results differ in order from what we streamed
+    private bool NeedsResync()
+    {
+        var scannerResults = _scanner.Results;
+        if (scannerResults.Count == 0) return false;
+        if (Results.Count == 0) return true;
+        // Compare first and last items to detect reordering
+        if (Results.Count >= 2 && scannerResults.Count >= 2)
+        {
+            if (!ReferenceEquals(Results[0], scannerResults[0]) ||
+                !ReferenceEquals(Results[Results.Count - 1], scannerResults[scannerResults.Count - 1]))
+                return true;
+        }
+        return false;
     }
 
     public async Task RunDeleteAsync(DeleteMode deleteMode)
@@ -292,6 +364,17 @@ public class ScannerViewModel : ViewModelBase
                 }
                 return false;
             };
+        }
+    }
+
+    private void ApplyGrouping()
+    {
+        if (FilteredResults == null) return;
+
+        FilteredResults.GroupDescriptions.Clear();
+        if (_isGrouped)
+        {
+            FilteredResults.GroupDescriptions.Add(new PropertyGroupDescription(nameof(ScanResultItem.ParentFolder)));
         }
     }
 }
