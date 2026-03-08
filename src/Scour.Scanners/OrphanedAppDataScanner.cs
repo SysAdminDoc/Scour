@@ -66,7 +66,7 @@ public sealed class OrphanedAppDataScanner : ScannerBase
                         // Skip tiny directories (< 1KB) - likely just empty remnants
                         if (size < 1024) continue;
 
-                        _results.Add(new ScanResultItem
+                        AddResult(new ScanResultItem
                         {
                             FullPath = entry.FullPath,
                             Name = entry.Name,

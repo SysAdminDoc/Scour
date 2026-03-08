@@ -37,7 +37,7 @@ public sealed class BigFileScanner : ScannerBase
 
         foreach (var entry in heap.Reverse())
         {
-            _results.Add(new ScanResultItem
+            AddResult(new ScanResultItem
             {
                 FullPath = entry.Path,
                 Name = Path.GetFileName(entry.Path),

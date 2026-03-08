@@ -18,6 +18,7 @@ public partial class MainWindow : Window
                 if (vm.Scanners.Count > 0)
                     vm.ActiveScanner = vm.Scanners[0];
             }
+            WindowState = WindowState.Maximized;
         };
 
         Closing += (_, _) =>

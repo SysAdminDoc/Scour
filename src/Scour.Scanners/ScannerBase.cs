@@ -15,6 +15,20 @@ public abstract class ScannerBase : IScannerModule
 
     public IReadOnlyList<ScanResultItem> Results => _results;
 
+    /// <summary>
+    /// Callback fired when a result is found during scanning. Used for real-time streaming to UI.
+    /// </summary>
+    public Action<ScanResultItem>? OnItemFound { get; set; }
+
+    /// <summary>
+    /// Add a result and notify the UI for real-time streaming.
+    /// </summary>
+    protected void AddResult(ScanResultItem item)
+    {
+        _results.Add(item);
+        OnItemFound?.Invoke(item);
+    }
+
     public abstract Task ScanAsync(ScanConfig config, IProgress<ScanProgress> progress, CancellationToken ct);
 
     public virtual async Task DeleteSelectedAsync(IEnumerable<ScanResultItem> items, DeleteMode mode,

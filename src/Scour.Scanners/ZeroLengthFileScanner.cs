@@ -53,7 +53,7 @@ public sealed class ZeroLengthFileScanner : ScannerBase
 
                     if (entry.SizeBytes == 0)
                     {
-                        _results.Add(new ScanResultItem
+                        AddResult(new ScanResultItem
                         {
                             FullPath = entry.FullPath,
                             Name = entry.Name,

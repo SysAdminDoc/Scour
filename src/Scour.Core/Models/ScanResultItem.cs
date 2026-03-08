@@ -27,6 +27,8 @@ public class ScanResultItem : INotifyPropertyChanged
         }
     }
 
+    public string ParentFolder => System.IO.Path.GetDirectoryName(FullPath) ?? "";
+
     public string SizeFormatted => FormatSize(SizeBytes);
     public string ModifiedFormatted => Modified == default ? "" : Modified.ToString("yyyy-MM-dd HH:mm");
 

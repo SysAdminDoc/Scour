@@ -61,7 +61,7 @@ public sealed class LockedFileScanner : ScannerBase
                 var reason = TestAccess(entry.FullPath);
                 if (reason != null)
                 {
-                    _results.Add(new ScanResultItem
+                    AddResult(new ScanResultItem
                     {
                         FullPath = entry.FullPath,
                         Name = entry.Name,

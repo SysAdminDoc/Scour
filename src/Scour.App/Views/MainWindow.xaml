@@ -215,6 +215,11 @@
                                         Padding="10,6" FontSize="11"
                                         Command="{Binding ExportJsonCommand}" ToolTip="Export JSON"/>
                                 <Border Width="1" Background="{StaticResource Surface1Brush}" Margin="8,2"/>
+                                <ToggleButton Content="&#xE8B7; Group" FontFamily="Segoe UI" FontSize="11"
+                                              IsChecked="{Binding ActiveScanner.IsGrouped}"
+                                              Style="{StaticResource SubtleToggleButton}" Margin="4,0"
+                                              Padding="10,6" ToolTip="Group results by folder"/>
+                                <Border Width="1" Background="{StaticResource Surface1Brush}" Margin="8,2"/>
                                 <Button Content="Cancel" Style="{StaticResource SubtleButton}" Margin="4,0"
                                         Padding="10,6" FontSize="11"
                                         Command="{Binding CancelActiveCommand}" ToolTip="Escape"
@@ -260,6 +265,34 @@
                               VirtualizingPanel.VirtualizationMode="Recycling"
                               EnableRowVirtualization="True"
                               ScrollViewer.CanContentScroll="True">
+                        <DataGrid.GroupStyle>
+                            <GroupStyle>
+                                <GroupStyle.ContainerStyle>
+                                    <Style TargetType="{x:Type GroupItem}">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                    <Expander IsExpanded="True" Background="Transparent" BorderBrush="Transparent"
+                                                              Foreground="{StaticResource TextBrush}">
+                                                        <Expander.Header>
+                                                            <StackPanel Orientation="Horizontal" Margin="0,4,0,2">
+                                                                <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                                                           Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                                <TextBlock Text="{Binding Path=Name}" FontWeight="SemiBold" FontSize="12"
+                                                                           Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                                                                <TextBlock Text="{Binding Path=ItemCount, StringFormat=' ({0})'}" FontSize="11"
+                                                                           Foreground="{StaticResource Overlay1Brush}" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                                            </StackPanel>
+                                                        </Expander.Header>
+                                                        <ItemsPresenter/>
+                                                    </Expander>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </GroupStyle.ContainerStyle>
+                            </GroupStyle>
+                        </DataGrid.GroupStyle>
                         <DataGrid.ContextMenu>
                             <ContextMenu Background="{StaticResource Surface0Brush}" Foreground="{StaticResource TextBrush}"
                                          BorderBrush="{StaticResource Surface1Brush}"

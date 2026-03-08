@@ -116,7 +116,7 @@ public sealed class DuplicateFileScanner : ScannerBase
 
             foreach (var file in files)
             {
-                _results.Add(new ScanResultItem
+                AddResult(new ScanResultItem
                 {
                     FullPath = file.Path,
                     Name = Path.GetFileName(file.Path),

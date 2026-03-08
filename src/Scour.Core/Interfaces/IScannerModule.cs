@@ -17,6 +17,11 @@ public interface IScannerModule
     IReadOnlyList<ColumnDefinition> ResultColumns { get; }
 
     /// <summary>
+    /// Callback fired when a result is found during scanning. Used for real-time streaming to UI.
+    /// </summary>
+    Action<ScanResultItem>? OnItemFound { get; set; }
+
+    /// <summary>
     /// Run the scan. Push results into the channel as they are found.
     /// </summary>
     Task ScanAsync(ScanConfig config, IProgress<ScanProgress> progress, CancellationToken ct);

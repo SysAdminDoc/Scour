@@ -71,7 +71,7 @@ public sealed class BrokenSymlinkScanner : ScannerBase
 
                 if (isBroken)
                 {
-                    _results.Add(new ScanResultItem
+                    AddResult(new ScanResultItem
                     {
                         FullPath = entry.FullPath,
                         Name = entry.Name,

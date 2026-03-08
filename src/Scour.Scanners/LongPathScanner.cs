@@ -66,7 +66,7 @@ public sealed class LongPathScanner : ScannerBase
                     // Check directory path length too
                     if (entry.FullPath.Length > MAX_PATH)
                     {
-                        _results.Add(new ScanResultItem
+                        AddResult(new ScanResultItem
                         {
                             FullPath = entry.FullPath,
                             Name = entry.Name,
@@ -86,7 +86,7 @@ public sealed class LongPathScanner : ScannerBase
 
                 if (entry.FullPath.Length > MAX_PATH)
                 {
-                    _results.Add(new ScanResultItem
+                    AddResult(new ScanResultItem
                     {
                         FullPath = entry.FullPath,
                         Name = entry.Name,

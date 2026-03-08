@@ -70,7 +70,7 @@ public sealed class OldFileScanner : ScannerBase
                             ? $"{age.TotalDays / 365:F1} years"
                             : $"{(int)age.TotalDays} days";
 
-                        _results.Add(new ScanResultItem
+                        AddResult(new ScanResultItem
                         {
                             FullPath = entry.FullPath,
                             Name = entry.Name,
