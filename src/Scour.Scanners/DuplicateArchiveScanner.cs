@@ -68,7 +68,7 @@ public sealed class DuplicateArchiveScanner : ScannerBase
 
             progress.Report(new ScanProgress($"Checking: {archive.Name}", done, total));
 
-            _results.Add(new ScanResultItem
+            AddResult(new ScanResultItem
             {
                 FullPath = archive.FullPath,
                 Name = archive.Name,

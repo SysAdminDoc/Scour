@@ -74,7 +74,7 @@ public sealed class BrokenShortcutScanner : ScannerBase
 
                 if (!targetExists)
                 {
-                    _results.Add(new ScanResultItem
+                    AddResult(new ScanResultItem
                     {
                         FullPath = entry.FullPath,
                         Name = entry.Name,

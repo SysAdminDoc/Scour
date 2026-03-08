@@ -84,7 +84,7 @@ public sealed class EmptyDirectoryScanner : ScannerBase
 
             var detail = dir.FileCount > 0 ? $"{dir.FileCount} ignored file(s)" : "Empty";
 
-            _results.Add(new ScanResultItem
+            AddResult(new ScanResultItem
             {
                 FullPath = dir.FullPath,
                 Name = dir.Name,
