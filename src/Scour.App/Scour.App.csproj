@@ -15,7 +15,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>scour.ico</ApplicationIcon>
+    <ApplicationIcon>..\..\icon.ico</ApplicationIcon>
     <Version>0.3.0</Version>
     <AssemblyTitle>Scour</AssemblyTitle>
     <Description>Multi-function file cleanup tool for Windows</Description>
