@@ -38,3 +38,7 @@ Desktop.ini
 
 ## Scour settings (user-specific)
 CLAUDE.md
+
+# Markdown files local-only (except README)
+*.md
+!README.md
