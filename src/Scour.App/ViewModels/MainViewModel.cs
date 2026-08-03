@@ -117,6 +117,7 @@ public class MainViewModel : ViewModelBase
             new SystemSpaceScanner(),
             new GameOrphanScanner(),
             new VhdxBloatScanner(),
+            new RecycleBinScanner(),
             new BigFileScanner(),
             new TempFileScanner(),
             new ZeroLengthFileScanner(),

@@ -1,3 +1,5 @@
+using System.Buffers.Binary;
+using System.Text;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Scour.Scanners;
@@ -265,6 +267,46 @@ Run("VHDX scanner inventories large virtual disks without mutating them", () =>
             .GetAwaiter()
             .GetResult();
         Assert(File.Exists(vhdx), "simulate compaction must not remove the VHDX");
+    }
+    finally
+    {
+        if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+    }
+});
+
+Run("Recycle Bin scanner parses original path and deletion metadata", () =>
+{
+    var root = Path.Combine(Path.GetTempPath(), $"scour-recycle-test-{Guid.NewGuid():N}");
+    var sidRoot = Path.Combine(root, "$Recycle.Bin", "S-1-5-18");
+    Directory.CreateDirectory(sidRoot);
+    var infoPath = Path.Combine(sidRoot, "$I1234567890ABCDEF");
+    var dataPath = Path.Combine(sidRoot, "$R1234567890ABCDEF");
+    var originalPath = @"C:\Users\Test\Documents\old.txt";
+    try
+    {
+        var payload = new byte[28 + originalPath.Length * 2];
+        BinaryPrimitives.WriteUInt64LittleEndian(payload.AsSpan(0, 8), 2);
+        BinaryPrimitives.WriteInt64LittleEndian(payload.AsSpan(8, 8), 4096);
+        BinaryPrimitives.WriteInt64LittleEndian(payload.AsSpan(16, 8), DateTime.Now.AddDays(-2).ToFileTimeUtc());
+        BinaryPrimitives.WriteInt32LittleEndian(payload.AsSpan(24, 4), originalPath.Length);
+        Encoding.Unicode.GetBytes(originalPath).CopyTo(payload.AsSpan(28));
+        File.WriteAllBytes(infoPath, payload);
+        File.WriteAllBytes(dataPath, new byte[64]);
+
+        var scanner = new RecycleBinScanner([root]);
+        scanner.ScanAsync(
+                new Scour.Core.ScanConfig { RootPath = root, SkipSystem = false },
+                new Progress<Scour.Core.Interfaces.ScanProgress>(),
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+
+        Assert(scanner.Results.Count == 1, $"result count was {scanner.Results.Count}");
+        Assert(scanner.Results[0].Name == "old.txt");
+        Assert(scanner.Results[0].SizeBytes == 4096);
+        Assert(scanner.Results[0].Detail.Contains(originalPath, StringComparison.Ordinal));
+        Assert(scanner.Results[0].Detail.Contains("S-1-5-18", StringComparison.Ordinal));
+        Assert(!scanner.Results[0].IsSelected, "Recycle Bin inspection must remain read-only");
     }
     finally
     {

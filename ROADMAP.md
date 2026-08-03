@@ -5,8 +5,6 @@ Future direction for Scour, a Win32/MFT-powered disk cleanup utility. Focus: mor
 ## Planned Features
 
 ### New scanners
-- Recycle Bin introspection (per-volume `$Recycle.Bin` enumeration with original path + user SID resolution)
-
 ### Engine & performance
 - Persistent MFT cache (`%LOCALAPPDATA%\Scour\mft-cache.bin`) with USN delta refresh instead of full re-enum
 - BLAKE3 as optional hash backend behind partial SHA256 (faster full-hash pass on big files)
