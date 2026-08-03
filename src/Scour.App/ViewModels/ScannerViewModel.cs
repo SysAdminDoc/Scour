@@ -19,6 +19,8 @@ public class ScannerViewModel : ViewModelBase
     private readonly object _resultsLock = new();
     private readonly ConcurrentQueue<ScanResultItem> _streamQueue = new();
     private DispatcherTimer? _streamTimer;
+    private int _streamedFiles;
+    private long _streamedBytes;
 
     public IScannerModule Scanner => _scanner;
     public string Name => _scanner.Name;
@@ -71,6 +73,30 @@ public class ScannerViewModel : ViewModelBase
 
     private string _elapsedTime = "";
     public string ElapsedTime { get => _elapsedTime; set => SetProperty(ref _elapsedTime, value); }
+
+    private int _filesPerSecond;
+    public int FilesPerSecond
+    {
+        get => _filesPerSecond;
+        private set
+        {
+            if (SetProperty(ref _filesPerSecond, value))
+                OnPropertyChanged(nameof(ThroughputText));
+        }
+    }
+
+    private double _megabytesPerSecond;
+    public double MegabytesPerSecond
+    {
+        get => _megabytesPerSecond;
+        private set
+        {
+            if (SetProperty(ref _megabytesPerSecond, value))
+                OnPropertyChanged(nameof(ThroughputText));
+        }
+    }
+
+    public string ThroughputText => $"{FilesPerSecond:N0} files/s  |  {MegabytesPerSecond:N1} MB/s";
 
     private int _errorCount;
     public int ErrorCount { get => _errorCount; set => SetProperty(ref _errorCount, value); }
@@ -139,6 +165,10 @@ public class ScannerViewModel : ViewModelBase
         HasResults = false;
         Progress = 0;
         ErrorCount = 0;
+        _streamedFiles = 0;
+        _streamedBytes = 0;
+        FilesPerSecond = 0;
+        MegabytesPerSecond = 0;
         StatusText = "Scanning...";
         _stopwatch.Restart();
 
@@ -162,6 +192,7 @@ public class ScannerViewModel : ViewModelBase
             if (p.Status.StartsWith("Error:"))
                 ErrorCount++;
             ElapsedTime = _stopwatch.Elapsed.ToString(@"mm\:ss");
+            UpdateTelemetry(p.FilesProcessed > 0 ? p.FilesProcessed : p.Current, p.BytesProcessed);
         });
 
         try
@@ -204,6 +235,7 @@ public class ScannerViewModel : ViewModelBase
             _streamTimer = null;
             _scanner.OnItemFound = null;
             _stopwatch.Stop();
+            UpdateTelemetry(_streamedFiles, _streamedBytes);
             IsScanning = false;
             IsIndeterminate = false;
             Progress = 100;
@@ -217,11 +249,25 @@ public class ScannerViewModel : ViewModelBase
         while (_streamQueue.TryDequeue(out var item) && batch < 500)
         {
             Results.Add(item);
+            _streamedFiles++;
+            _streamedBytes = SaturatingAdd(_streamedBytes, Math.Max(0, item.SizeBytes));
             batch++;
         }
         if (batch > 0)
             HasResults = true;
     }
+
+    private void UpdateTelemetry(int files, long bytes)
+    {
+        var elapsedSeconds = Math.Max(0.001, _stopwatch.Elapsed.TotalSeconds);
+        var effectiveFiles = Math.Max(files, _streamedFiles);
+        var effectiveBytes = Math.Max(bytes, _streamedBytes);
+        FilesPerSecond = (int)Math.Min(int.MaxValue, Math.Round(effectiveFiles / elapsedSeconds));
+        MegabytesPerSecond = effectiveBytes / elapsedSeconds / (1024d * 1024d);
+    }
+
+    private static long SaturatingAdd(long left, long right)
+        => right > long.MaxValue - left ? long.MaxValue : left + right;
 
     /// Check if the scanner's final results differ in order from what we streamed
     private bool NeedsResync()

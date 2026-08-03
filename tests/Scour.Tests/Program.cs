@@ -561,6 +561,13 @@ Run("theme palettes render offscreen", () =>
         throw failure;
 });
 
+Run("scan progress carries telemetry fields", () =>
+{
+    var progress = new Scour.Core.Interfaces.ScanProgress("Scanning", 8, 20, false, 4096, 7);
+    Assert(progress.BytesProcessed == 4096);
+    Assert(progress.FilesProcessed == 7);
+});
+
 if (failures.Count > 0)
 {
     foreach (var failure in failures)

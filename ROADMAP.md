@@ -10,7 +10,6 @@ Future direction for Scour, a Win32/MFT-powered disk cleanup utility. Focus: mor
 ### CLI, automation, scripting
 
 ### UI/UX
-- Per-scanner progress pane with throughput MB/s and files/s
 - Result pinning (keep flagged items across rescans)
 - "Why is this flagged?" explain-panel per row for debloat-script authoring
 

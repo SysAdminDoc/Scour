@@ -45,4 +45,10 @@ public interface IScannerModule
 
 public record ColumnDefinition(string Header, string BindingPath, double Width = 0, bool RightAlign = false);
 
-public record ScanProgress(string Status, int Current, int Total, bool IsIndeterminate = false);
+public record ScanProgress(
+    string Status,
+    int Current,
+    int Total,
+    bool IsIndeterminate = false,
+    long BytesProcessed = 0,
+    int FilesProcessed = 0);
