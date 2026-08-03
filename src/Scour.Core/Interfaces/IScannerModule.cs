@@ -9,6 +9,7 @@ public interface IScannerModule
     string Name { get; }
     string Description { get; }
     string IconGlyph { get; } // Segoe Fluent Icons glyph
+    string DeleteActionLabel => "\uE74D  Delete Selected";
 
     /// <summary>
     /// Column definitions for the results DataGrid.

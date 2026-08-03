@@ -11,6 +11,7 @@ public abstract class ScannerBase : IScannerModule
     public abstract string Name { get; }
     public abstract string Description { get; }
     public abstract string IconGlyph { get; }
+    public virtual string DeleteActionLabel => "\uE74D  Delete Selected";
     public abstract IReadOnlyList<ColumnDefinition> ResultColumns { get; }
 
     public IReadOnlyList<ScanResultItem> Results => _results;

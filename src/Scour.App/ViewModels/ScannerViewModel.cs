@@ -23,6 +23,7 @@ public class ScannerViewModel : ViewModelBase
     public string Name => _scanner.Name;
     public string Description => _scanner.Description;
     public string IconGlyph => _scanner.IconGlyph;
+    public string DeleteActionLabel => _scanner.DeleteActionLabel;
     public IReadOnlyList<ColumnDefinition> Columns => _scanner.ResultColumns;
 
     private string _statusText = "Ready";

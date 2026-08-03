@@ -154,6 +154,50 @@ Run("browser scanner reports cache data by profile", () =>
     }
 });
 
+Run("system scanner surfaces protected storage actions", () =>
+{
+    var root = Path.Combine(Path.GetTempPath(), $"scour-system-test-{Guid.NewGuid():N}");
+    var minidump = Path.Combine(root, "Minidump");
+    Directory.CreateDirectory(minidump);
+    try
+    {
+        File.WriteAllBytes(Path.Combine(root, "hiberfil.sys"), new byte[1024]);
+        File.WriteAllBytes(Path.Combine(root, "pagefile.sys"), new byte[2048]);
+        File.WriteAllBytes(Path.Combine(root, "MEMORY.DMP"), new byte[512]);
+        File.WriteAllBytes(Path.Combine(minidump, "mini.dmp"), new byte[256]);
+
+        var scanner = new SystemSpaceScanner(root, root);
+        scanner.ScanAsync(
+                new Scour.Core.ScanConfig { RootPath = root, SkipSystem = false },
+                new Progress<Scour.Core.Interfaces.ScanProgress>(),
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+
+        Assert(scanner.Results.Any(item => item.Name == "Hibernation file" && !item.IsSelected));
+        Assert(scanner.Results.Any(item => item.Name == "Pagefile" && !item.IsSelected));
+        Assert(scanner.Results.Count(item => item.Name == "Mini dump") == 1);
+        Assert(scanner.Results.Single(item => item.Name == "Full memory dump").IsSelected);
+
+        var actions = scanner.Results
+            .Where(item => item.Name is "Hibernation file" or "Pagefile")
+            .ToList();
+        scanner.DeleteSelectedAsync(
+                actions,
+                Scour.Core.DeleteMode.Simulate,
+                new Progress<Scour.Core.Interfaces.ScanProgress>(),
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+        Assert(File.Exists(Path.Combine(root, "hiberfil.sys")), "simulate must not remove hiberfil.sys");
+        Assert(File.Exists(Path.Combine(root, "pagefile.sys")), "simulate must not remove pagefile.sys");
+    }
+    finally
+    {
+        if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+    }
+});
+
 if (failures.Count > 0)
 {
     foreach (var failure in failures)
