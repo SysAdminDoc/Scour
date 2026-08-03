@@ -113,6 +113,7 @@ public class MainViewModel : ViewModelBase
             new DuplicateFileScanner(),
             new MediaDuplicateScanner(),
             new WinSxSScanner(),
+            new BrowserCacheScanner(),
             new BigFileScanner(),
             new TempFileScanner(),
             new ZeroLengthFileScanner(),

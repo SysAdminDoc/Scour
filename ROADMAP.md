@@ -5,7 +5,6 @@ Future direction for Scour, a Win32/MFT-powered disk cleanup utility. Focus: mor
 ## Planned Features
 
 ### New scanners
-- Browser cache/profile cleaner - Chrome, Edge, Firefox, Brave with per-profile breakdown
 - Hibernation/pagefile/crash-dump surface view with one-click disable + shrink
 - Steam/Epic/GOG orphaned game prefix detection (install records vs disk folders)
 - Docker/WSL vhdx bloat analyzer with compact-vhd integration

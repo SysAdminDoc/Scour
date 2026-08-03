@@ -123,6 +123,37 @@ Run("WinSxS scanner reports stale servicing data as protected", () =>
     }
 });
 
+Run("browser scanner reports cache data by profile", () =>
+{
+    var root = Path.Combine(Path.GetTempPath(), $"scour-browser-test-{Guid.NewGuid():N}");
+    var chromeCache = Path.Combine(root, "Google", "Chrome", "User Data", "Default", "Cache");
+    var firefoxCache = Path.Combine(root, "Mozilla", "Firefox", "Profiles", "demo.default-release", "cache2");
+    Directory.CreateDirectory(chromeCache);
+    Directory.CreateDirectory(firefoxCache);
+    try
+    {
+        File.WriteAllBytes(Path.Combine(chromeCache, "data_0"), new byte[128]);
+        File.WriteAllBytes(Path.Combine(firefoxCache, "entries"), new byte[256]);
+
+        var scanner = new BrowserCacheScanner(root, root);
+        scanner.ScanAsync(
+                new Scour.Core.ScanConfig { RootPath = root, SkipSystem = false },
+                new Progress<Scour.Core.Interfaces.ScanProgress>(),
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+
+        Assert(scanner.Results.Count == 2, $"result count was {scanner.Results.Count}");
+        Assert(scanner.Results.Any(item => item.Detail.Contains("Chrome", StringComparison.OrdinalIgnoreCase)));
+        Assert(scanner.Results.Any(item => item.Detail.Contains("Firefox", StringComparison.OrdinalIgnoreCase)));
+        Assert(scanner.Results.All(item => item.IsSelected), "browser cache entries should be removable by default");
+    }
+    finally
+    {
+        if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+    }
+});
+
 if (failures.Count > 0)
 {
     foreach (var failure in failures)

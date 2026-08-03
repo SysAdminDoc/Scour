@@ -13,13 +13,14 @@ Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to in
 
 ## Features
 
-### 14 Built-in Scanners
+### 15 Built-in Scanners
 | Scanner | Description |
 |---------|-------------|
 | **Empty Folders** | Bottom-up detection of truly empty directories (handles nested empties) |
 | **Duplicate Files** | 3-phase detection: size grouping -> partial SHA256 (4KB) -> full hash |
 | **Media Duplicates** | Near-duplicate photos and videos using dimensions plus bounded dHash/perceptual buckets |
 | **WinSxS Analysis** | Audit stale servicing workspaces and DISM reclaimable data without deleting component-store files |
+| **Browser Cache** | Find disposable Chrome, Edge, Brave, and Firefox cache data with profile-level breakdowns |
 | **Big Files** | Top 100 largest files via min-heap (O(n log N)) |
 | **Temp Files** | Pattern-based detection (.tmp, .bak, .log, Office lock files, macOS metadata, etc.) |
 | **Zero-Length Files** | Find 0-byte empty files cluttering your filesystem |
