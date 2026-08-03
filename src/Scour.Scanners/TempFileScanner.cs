@@ -55,7 +55,7 @@ public sealed class TempFileScanner : ScannerBase
                     if (entry.IsReparsePoint) continue;
                     if (config.SkipHidden && entry.IsHidden) continue;
                     if (config.SkipSystem && entry.IsSystem) continue;
-                    if (config.ExcludedDirectories.Contains(entry.Name, StringComparer.OrdinalIgnoreCase)) continue;
+                    if (config.IsExcludedDirectory(entry.FullPath, entry.Name)) continue;
                     ScanDir(entry.FullPath, depth + 1, config, ref scanned, progress, ct);
                 }
                 else

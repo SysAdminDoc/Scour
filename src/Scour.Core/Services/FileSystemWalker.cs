@@ -12,15 +12,10 @@ namespace Scour.Core.Services;
 public sealed class FileSystemWalker
 {
     private readonly ScanConfig _config;
-    private readonly HashSet<string> _excludedDirs;
 
     public FileSystemWalker(ScanConfig config)
     {
         _config = config;
-        _excludedDirs = new HashSet<string>(
-            config.ExcludedDirectories,
-            StringComparer.OrdinalIgnoreCase
-        );
     }
 
     /// <summary>
@@ -174,7 +169,7 @@ public sealed class FileSystemWalker
         if (entry.IsReparsePoint) return true;
         if (_config.SkipHidden && entry.IsHidden) return true;
         if (_config.SkipSystem && entry.IsSystem) return true;
-        if (_excludedDirs.Contains(entry.Name)) return true;
+        if (_config.IsExcludedDirectory(entry.FullPath, entry.Name)) return true;
         return false;
     }
 

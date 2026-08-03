@@ -61,7 +61,7 @@ public sealed class LongPathScanner : ScannerBase
                 {
                     if (config.SkipHidden && entry.IsHidden) continue;
                     if (config.SkipSystem && entry.IsSystem) continue;
-                    if (config.ExcludedDirectories.Contains(entry.Name, StringComparer.OrdinalIgnoreCase)) continue;
+                    if (config.IsExcludedDirectory(entry.FullPath, entry.Name)) continue;
 
                     // Check directory path length too
                     if (entry.FullPath.Length > MAX_PATH)

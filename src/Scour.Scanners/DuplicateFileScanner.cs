@@ -158,7 +158,7 @@ public sealed class DuplicateFileScanner : ScannerBase
                     if (entry.IsReparsePoint) continue;
                     if (config.SkipHidden && entry.IsHidden) continue;
                     if (config.SkipSystem && entry.IsSystem) continue;
-                    if (config.ExcludedDirectories.Contains(entry.Name, StringComparer.OrdinalIgnoreCase)) continue;
+                    if (config.IsExcludedDirectory(entry.FullPath, entry.Name)) continue;
 
                     ScanDirectory(entry.FullPath, depth + 1, config, sizeGroups, ref fileCount, progress, ct);
                 }

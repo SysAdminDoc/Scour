@@ -64,6 +64,7 @@ Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to in
 - **Per-scanner telemetry** - the progress pane reports files/s and MB/s while scanning
 - **Result pinning** - pin important findings from the context menu and keep them marked across rescans
 - **Finding explanations** - select a result to see the scanner rule, reason, safety state, suggested action, and path
+- **Result exclusions** - add a finding's containing folder to the persisted exclusion list directly from its context menu
 - **Settings persistence** - all options, window position, and excluded directories saved to `%LOCALAPPDATA%\Scour\settings.json`
 - **Windows Explorer context menu** - right-click any folder and select "Scan with Scour"
 

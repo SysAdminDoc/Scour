@@ -603,6 +603,42 @@ Run("finding explanations include scanner rules and safety guidance", () =>
     Assert(explanation.Safety.Contains("Selected by default", StringComparison.Ordinal));
 });
 
+Run("directory exclusions match exact paths without hiding same-named folders", () =>
+{
+    var root = Path.Combine(Path.GetTempPath(), $"scour-exclusion-test-{Guid.NewGuid():N}");
+    var excluded = Path.Combine(root, "skip-me");
+    var included = Path.Combine(root, "keep-me");
+    Directory.CreateDirectory(excluded);
+    Directory.CreateDirectory(included);
+    try
+    {
+        File.WriteAllText(Path.Combine(excluded, "excluded.tmp"), "excluded");
+        File.WriteAllText(Path.Combine(included, "included.tmp"), "included");
+
+        var scanner = new TempFileScanner();
+        scanner.ScanAsync(
+                new Scour.Core.ScanConfig
+                {
+                    RootPath = root,
+                    SkipSystem = false,
+                    ExcludedDirectories = [excluded]
+                },
+                new Progress<Scour.Core.Interfaces.ScanProgress>(),
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+
+        Assert(scanner.Results.Count == 1, $"result count was {scanner.Results.Count}");
+        Assert(scanner.Results[0].FullPath.EndsWith(Path.Combine("keep-me", "included.tmp"), StringComparison.OrdinalIgnoreCase));
+        Assert(DirectoryExclusionMatcher.IsExcluded(["skip-me"], excluded, "skip-me"));
+        Assert(!DirectoryExclusionMatcher.IsExcluded([excluded], included, "skip-me"));
+    }
+    finally
+    {
+        if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+    }
+});
+
 if (failures.Count > 0)
 {
     foreach (var failure in failures)

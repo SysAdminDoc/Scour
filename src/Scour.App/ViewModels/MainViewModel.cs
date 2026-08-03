@@ -129,6 +129,7 @@ public class MainViewModel : ViewModelBase
     public ICommand ExportCsvCommand { get; }
     public ICommand ExportJsonCommand { get; }
     public ICommand AddExcludeDirCommand { get; }
+    public ICommand AddExcludeFromResultCommand { get; }
     public ICommand RemoveExcludeDirCommand { get; }
     public ICommand ToggleContextMenuCommand { get; }
 
@@ -200,6 +201,7 @@ public class MainViewModel : ViewModelBase
         ExportCsvCommand = new RelayCommand(_ => DoExportCsv(), _ => ActiveScanner?.HasResults ?? false);
         ExportJsonCommand = new RelayCommand(_ => DoExportJson(), _ => ActiveScanner?.HasResults ?? false);
         AddExcludeDirCommand = new RelayCommand(_ => DoAddExcludeDir());
+        AddExcludeFromResultCommand = new RelayCommand(DoAddExcludeFromResult, param => param is ScanResultItem);
         RemoveExcludeDirCommand = new RelayCommand(DoRemoveExcludeDir);
         ToggleContextMenuCommand = new RelayCommand(_ => DoToggleContextMenu());
     }
@@ -374,6 +376,21 @@ public class MainViewModel : ViewModelBase
             ExcludedDirectories.Remove(dir);
             SyncExcludedDirs();
         }
+    }
+
+    private void DoAddExcludeFromResult(object? param)
+    {
+        if (param is not ScanResultItem item)
+            return;
+
+        var directory = item.IsDirectory ? item.FullPath : item.ParentFolder;
+        if (string.IsNullOrWhiteSpace(directory) || ExcludedDirectories.Contains(directory, StringComparer.OrdinalIgnoreCase))
+            return;
+
+        ExcludedDirectories.Add(directory);
+        SyncExcludedDirs();
+        if (ActiveScanner != null)
+            ActiveScanner.StatusText = $"Excluded {directory} from future scans";
     }
 
     private void SyncExcludedDirs()

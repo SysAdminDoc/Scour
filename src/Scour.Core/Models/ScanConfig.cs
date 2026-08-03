@@ -12,4 +12,7 @@ public class ScanConfig
     public long MinFileSizeBytes { get; init; }
     public long MaxFileSizeBytes { get; init; } // 0 = no limit
     public int MinFolderAgeHours { get; init; }
+
+    public bool IsExcludedDirectory(string fullPath, string name)
+        => Services.DirectoryExclusionMatcher.IsExcluded(ExcludedDirectories, fullPath, name);
 }

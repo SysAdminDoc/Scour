@@ -101,7 +101,7 @@ public sealed class DuplicateArchiveScanner : ScannerBase
                 {
                     if (config.SkipHidden && entry.IsHidden) continue;
                     if (config.SkipSystem && entry.IsSystem) continue;
-                    if (config.ExcludedDirectories.Contains(entry.Name, StringComparer.OrdinalIgnoreCase)) continue;
+                    if (config.IsExcludedDirectory(entry.FullPath, entry.Name)) continue;
                     dirs.Add(entry);
                     dirNames.Add(entry.Name);
                 }
