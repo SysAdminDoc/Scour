@@ -370,6 +370,19 @@ Run("MFT cache persists snapshots and applies USN changes", () =>
     }
 });
 
+Run("BLAKE3 matches official empty and one-byte vectors", () =>
+{
+    var empty = Convert.ToHexStringLower(Blake3Hasher.ComputeHash(ReadOnlySpan<byte>.Empty));
+    var zero = Convert.ToHexStringLower(Blake3Hasher.ComputeHash(new byte[] { 0 }));
+    var boundaryInput = Enumerable.Range(0, 1025).Select(index => (byte)(index % 251)).ToArray();
+    var oneChunk = Convert.ToHexStringLower(Blake3Hasher.ComputeHash(boundaryInput.AsSpan(0, 1024)));
+    var twoChunks = Convert.ToHexStringLower(Blake3Hasher.ComputeHash(boundaryInput));
+    Assert(empty == "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262", empty);
+    Assert(zero == "2d3adedff11b61f14c886e35afa036736dcd87a74d27b5c1510225d0f592e213", zero);
+    Assert(oneChunk == "42214739f095a406f3fc83deb889744ac00df831c10daa55189b5d121c855af7", oneChunk);
+    Assert(twoChunks == "d00278ae47eb27b34faecf67b4fe263f82d5412916c1ffd97c8cb7fb814b8444", twoChunks);
+});
+
 if (failures.Count > 0)
 {
     foreach (var failure in failures)

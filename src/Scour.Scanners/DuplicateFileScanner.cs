@@ -8,6 +8,8 @@ namespace Scour.Scanners;
 
 public sealed class DuplicateFileScanner : ScannerBase
 {
+    public FileHashAlgorithm FullHashAlgorithm { get; set; } = FileHashAlgorithm.Sha256;
+
     public override string Name => "Duplicate Files";
     public override string Description => "Find duplicate files by content hash";
     public override string IconGlyph => "\uE8C8"; // Copy icon
@@ -93,7 +95,7 @@ public sealed class DuplicateFileScanner : ScannerBase
                 token.ThrowIfCancellationRequested();
                 try
                 {
-                    var hash = await FileHasher.ComputeFullHashAsync(filePath, token);
+                    var hash = await FileHasher.ComputeFullHashAsync(filePath, token, FullHashAlgorithm);
                     var key = FileHasher.HashToHex(hash);
                     var info = new FileInfo(filePath);
                     fullHashGroups.GetOrAdd(key, _ => []).Add((filePath, info.Length, info.LastWriteTime));

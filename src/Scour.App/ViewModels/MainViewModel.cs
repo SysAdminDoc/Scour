@@ -59,6 +59,22 @@ public class MainViewModel : ViewModelBase
         set { if (SetProperty(ref _ignore0Kb, value)) _settings.Ignore0Kb = value; }
     }
 
+    private FileHashAlgorithm _fullHashAlgorithm = FileHashAlgorithm.Sha256;
+    public FileHashAlgorithm FullHashAlgorithm
+    {
+        get => _fullHashAlgorithm;
+        set
+        {
+            if (SetProperty(ref _fullHashAlgorithm, value))
+            {
+                _settings.FullHashAlgorithm = value;
+                ApplyHashAlgorithm();
+            }
+        }
+    }
+
+    public IReadOnlyList<FileHashAlgorithm> HashAlgorithms { get; } = Enum.GetValues<FileHashAlgorithm>();
+
     private DeleteMode _deleteMode = DeleteMode.RecycleBin;
     public DeleteMode DeleteMode
     {
@@ -99,6 +115,7 @@ public class MainViewModel : ViewModelBase
         _skipHidden = _settings.SkipHidden;
         _skipSystem = _settings.SkipSystem;
         _ignore0Kb = _settings.Ignore0Kb;
+        _fullHashAlgorithm = _settings.FullHashAlgorithm;
         _deleteMode = _settings.DeleteMode;
 
         foreach (var dir in _settings.ExcludedDirectories)
@@ -132,6 +149,8 @@ public class MainViewModel : ViewModelBase
 
         foreach (var m in modules)
             Scanners.Add(new ScannerViewModel(m));
+
+        ApplyHashAlgorithm();
 
         ActiveScanner = Scanners.FirstOrDefault();
 
@@ -183,6 +202,16 @@ public class MainViewModel : ViewModelBase
         ExcludedDirectories = [.. ExcludedDirectories],
         IgnoreFiles = [.. _settings.IgnoreFiles],
     };
+
+    private void ApplyHashAlgorithm()
+    {
+        var duplicateScanner = Scanners
+            .Select(scanner => scanner.Scanner)
+            .OfType<DuplicateFileScanner>()
+            .FirstOrDefault();
+        if (duplicateScanner != null)
+            duplicateScanner.FullHashAlgorithm = FullHashAlgorithm;
+    }
 
     private void DoBrowse()
     {

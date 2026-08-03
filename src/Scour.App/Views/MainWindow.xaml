@@ -108,6 +108,11 @@
                                       Foreground="{StaticResource TextBrush}" Margin="4,4"/>
                             <CheckBox Content="Ignore 0 KB files" IsChecked="{Binding Ignore0Kb}"
                                       Foreground="{StaticResource TextBrush}" Margin="4,4"/>
+                            <TextBlock Text="DUPLICATE FULL HASH" FontSize="9" FontWeight="Bold" Margin="4,10,0,4"
+                                       Foreground="{StaticResource Overlay1Brush}"/>
+                            <ComboBox ItemsSource="{Binding HashAlgorithms}" SelectedItem="{Binding FullHashAlgorithm}"
+                                      Style="{StaticResource DarkComboBox}" FontSize="11" Padding="7,5"
+                                      ToolTip="SHA256 is the compatibility default; BLAKE3 is a faster optional full-hash backend"/>
                         </StackPanel>
 
                         <!-- Delete Mode -->

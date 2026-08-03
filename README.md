@@ -5,7 +5,7 @@
 ![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 
-A high-performance disk cleanup utility for Windows. Scour uses Win32 native filesystem APIs and NTFS MFT direct reading to scan millions of files fast, then helps you identify and remove wasted space across 12 different scanner types.
+A high-performance disk cleanup utility for Windows. Scour uses Win32 native filesystem APIs and NTFS MFT direct reading to scan millions of files fast, then helps you identify and remove wasted space across 19 different scanner types.
 
 Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to install.
 
@@ -17,7 +17,7 @@ Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to in
 | Scanner | Description |
 |---------|-------------|
 | **Empty Folders** | Bottom-up detection of truly empty directories (handles nested empties) |
-| **Duplicate Files** | 3-phase detection: size grouping -> partial SHA256 (4KB) -> full hash |
+| **Duplicate Files** | 3-phase detection: size grouping -> partial SHA256 (4KB) -> configurable SHA256 or BLAKE3 full hash |
 | **Media Duplicates** | Near-duplicate photos and videos using dimensions plus bounded dHash/perceptual buckets |
 | **WinSxS Analysis** | Audit stale servicing workspaces and DISM reclaimable data without deleting component-store files |
 | **Browser Cache** | Find disposable Chrome, Edge, Brave, and Firefox cache data with profile-level breakdowns |
@@ -42,6 +42,7 @@ Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to in
 - **Persistent MFT cache** - `%LOCALAPPDATA%\Scour\mft-cache.bin` stores journal checkpoints and applies USN deltas atomically between full rebuilds
 - **Parallel directory walking** at shallow depths with `Parallel.ForEachAsync`
 - **Partial hash optimization** - only full-hashes files that collide on 4KB prefix hash
+- **Optional BLAKE3 backend** - portable managed implementation with no package dependency; SHA256 remains the default compatibility option
 - **DataGrid virtualization** for smooth scrolling through large result sets
 - **Long path support** via `\\?\` prefix (handles paths > 260 chars)
 
@@ -99,8 +100,8 @@ Scour/
       Interfaces/         # IScannerModule contract
       Models/             # ScanConfig, ScanResultItem, DeleteMode
       Native/             # Win32 P/Invoke, NTFS MFT reader
-      Services/           # FileSystemWalker, FileHasher, DeletionService, AppSettings, ContextMenuService
-    Scour.Scanners/       # Scanner implementations (12 modules)
+      Services/           # FileSystemWalker, FileHasher, Blake3Hasher, DeletionService, AppSettings, ContextMenuService
+    Scour.Scanners/       # Scanner implementations (19 modules)
       ScannerBase.cs      # Shared base class (deletion, reset)
       EmptyDirectoryScanner.cs
       DuplicateFileScanner.cs
