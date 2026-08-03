@@ -2,6 +2,7 @@ using System.Buffers.Binary;
 using System.Text;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Scour.Core;
 using Scour.Core.Native;
 using Scour.Core.Services;
 using Scour.Scanners;
@@ -381,6 +382,15 @@ Run("BLAKE3 matches official empty and one-byte vectors", () =>
     Assert(zero == "2d3adedff11b61f14c886e35afa036736dcd87a74d27b5c1510225d0f592e213", zero);
     Assert(oneChunk == "42214739f095a406f3fc83deb889744ac00df831c10daa55189b5d121c855af7", oneChunk);
     Assert(twoChunks == "d00278ae47eb27b34faecf67b4fe263f82d5412916c1ffd97c8cb7fb814b8444", twoChunks);
+});
+
+Run("scan presets expose bounded scanner bundles", () =>
+{
+    Assert(ScanPresetCatalog.Includes(ScanPreset.Quick, "Big Files"), "quick big files");
+    Assert(!ScanPresetCatalog.Includes(ScanPreset.Quick, "Duplicate Files"), "quick excludes duplicate hashing");
+    Assert(ScanPresetCatalog.Includes(ScanPreset.Deep, "Duplicate Files"), "deep duplicate files");
+    Assert(!ScanPresetCatalog.Includes(ScanPreset.Deep, "WinSxS Analysis"), "deep excludes system audit");
+    Assert(ScanPresetCatalog.GetDefinition(ScanPreset.Forensic).ScannerNames.Count == 19, "forensic scanner count");
 });
 
 if (failures.Count > 0)

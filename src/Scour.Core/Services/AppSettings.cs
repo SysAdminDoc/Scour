@@ -10,6 +10,7 @@ public class AppSettings
     public bool SkipSystem { get; set; } = true;
     public bool Ignore0Kb { get; set; } = true;
     public FileHashAlgorithm FullHashAlgorithm { get; set; } = FileHashAlgorithm.Sha256;
+    public ScanPreset ScanPreset { get; set; } = ScanPreset.Forensic;
     public DeleteMode DeleteMode { get; set; } = DeleteMode.RecycleBin;
     public List<string> ExcludedDirectories { get; set; } =
     [

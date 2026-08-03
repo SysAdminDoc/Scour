@@ -75,6 +75,23 @@ public class MainViewModel : ViewModelBase
 
     public IReadOnlyList<FileHashAlgorithm> HashAlgorithms { get; } = Enum.GetValues<FileHashAlgorithm>();
 
+    private ScanPreset _scanPreset = ScanPreset.Forensic;
+    public ScanPreset ScanPreset
+    {
+        get => _scanPreset;
+        set
+        {
+            if (SetProperty(ref _scanPreset, value))
+            {
+                _settings.ScanPreset = value;
+                OnPropertyChanged(nameof(ScanPresetDescription));
+            }
+        }
+    }
+
+    public IReadOnlyList<ScanPreset> ScanPresets => ScanPresetCatalog.Presets;
+    public string ScanPresetDescription => ScanPresetCatalog.GetDefinition(ScanPreset).Description;
+
     private DeleteMode _deleteMode = DeleteMode.RecycleBin;
     public DeleteMode DeleteMode
     {
@@ -116,6 +133,7 @@ public class MainViewModel : ViewModelBase
         _skipSystem = _settings.SkipSystem;
         _ignore0Kb = _settings.Ignore0Kb;
         _fullHashAlgorithm = _settings.FullHashAlgorithm;
+        _scanPreset = _settings.ScanPreset;
         _deleteMode = _settings.DeleteMode;
 
         foreach (var dir in _settings.ExcludedDirectories)
@@ -242,7 +260,7 @@ public class MainViewModel : ViewModelBase
     {
         var config = BuildConfig();
         var tasks = new List<Task>();
-        foreach (var scanner in Scanners)
+        foreach (var scanner in Scanners.Where(scanner => ScanPresetCatalog.Includes(ScanPreset, scanner.Name)))
         {
             scanner.BuildConfig = config;
             tasks.Add(scanner.RunScanAsync());

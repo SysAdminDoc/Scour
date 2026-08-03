@@ -14,6 +14,7 @@ All notable changes to Scour will be documented in this file.
 - Added: Read-only Recycle Bin scanner with per-volume metadata, original paths, deletion times, and SID resolution.
 - Added: Persistent MFT cache with atomic snapshots and USN-journal delta refresh with full-enumeration fallback.
 - Added: Optional dependency-free BLAKE3 full-hash backend for duplicate detection, selectable alongside the SHA256 default.
+- Added: Quick, Deep, and Forensic scan presets with persisted bundle selection for Scan All.
 
 ## [v0.3.0] - %Y->- (HEAD -> main, origin/main, origin/HEAD)
 

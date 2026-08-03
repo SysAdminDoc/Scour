@@ -56,6 +56,7 @@ Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to in
 - **Sortable columns** with proper numeric/date sorting
 - **Duplicate group coloring** - subtle tinted row backgrounds per duplicate group
 - **Scan All** - run all 19 scanners in parallel with one click
+- **Scan presets** - choose Quick, Deep, or Forensic bundles before using Scan All; the default Forensic preset preserves the full scan behavior
 - **Selected size summary** - status bar shows count and total size of selected items
 - **Scan duration** and error count in status bar
 - **Settings persistence** - all options, window position, and excluded directories saved to `%LOCALAPPDATA%\Scour\settings.json`

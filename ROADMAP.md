@@ -6,7 +6,6 @@ Future direction for Scour, a Win32/MFT-powered disk cleanup utility. Focus: mor
 
 ### New scanners
 ### Engine & performance
-- Scan presets (Quick / Deep / Forensic) that enable scanner bundles with one click
 - Folder size treemap view (WizTree-style) as an alternate tab on Big Files
 
 ### CLI, automation, scripting
