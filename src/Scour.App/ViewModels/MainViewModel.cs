@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Windows.Input;
 using Microsoft.Win32;
 using Scour.Core;
+using Scour.App.Services;
 using Scour.Core.Interfaces;
 using Scour.Core.Services;
 using Scour.Scanners;
@@ -92,6 +93,22 @@ public class MainViewModel : ViewModelBase
     public IReadOnlyList<ScanPreset> ScanPresets => ScanPresetCatalog.Presets;
     public string ScanPresetDescription => ScanPresetCatalog.GetDefinition(ScanPreset).Description;
 
+    private ThemeMode _themeMode = ThemeMode.Mocha;
+    public ThemeMode ThemeMode
+    {
+        get => _themeMode;
+        set
+        {
+            if (SetProperty(ref _themeMode, value))
+            {
+                _settings.ThemeMode = value;
+                ThemeManager.Apply(value);
+            }
+        }
+    }
+
+    public IReadOnlyList<ThemeMode> ThemeModes { get; } = Enum.GetValues<ThemeMode>();
+
     private DeleteMode _deleteMode = DeleteMode.RecycleBin;
     public DeleteMode DeleteMode
     {
@@ -134,7 +151,10 @@ public class MainViewModel : ViewModelBase
         _ignore0Kb = _settings.Ignore0Kb;
         _fullHashAlgorithm = _settings.FullHashAlgorithm;
         _scanPreset = _settings.ScanPreset;
+        _themeMode = _settings.ThemeMode;
         _deleteMode = _settings.DeleteMode;
+
+        ThemeManager.Apply(_themeMode);
 
         foreach (var dir in _settings.ExcludedDirectories)
             ExcludedDirectories.Add(dir);

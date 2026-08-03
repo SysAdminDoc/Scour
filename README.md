@@ -49,6 +49,7 @@ Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to in
 
 ### UI/UX
 - **Catppuccin Mocha** dark theme with custom borderless window chrome
+- **Theme toggle** - persisted Catppuccin Mocha, Latte, and OLED palettes
 - **Keyboard shortcuts**: F5 (scan), Escape (cancel), Ctrl+A/D/I (select all/none/invert), Ctrl+E (export), Delete
 - **Filter bar** - real-time search results by name, path, or detail
 - **Right-click context menu** - open file location, copy path, remove from list

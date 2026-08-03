@@ -1,12 +1,16 @@
 using System.Buffers.Binary;
 using System.Text;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Scour.App.Services;
 using Scour.Cli;
 using Scour.Core;
 using Scour.Core.Native;
 using Scour.Core.Services;
 using Scour.Scanners;
+using ScourThemeMode = Scour.Core.ThemeMode;
 
 var failures = new List<string>();
 
@@ -500,6 +504,61 @@ Run("CLI writes a weekly scheduled-task template", () =>
         if (File.Exists(taskPath)) File.Delete(taskPath);
         if (Directory.Exists(reportPath)) Directory.Delete(reportPath, recursive: true);
     }
+});
+
+Run("theme palettes render offscreen", () =>
+{
+    Exception? failure = null;
+    var thread = new Thread(() =>
+    {
+        try
+        {
+            var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+            ThemeManager.Apply(ScourThemeMode.Mocha);
+            var window = new Window
+            {
+                Width = 400,
+                Height = 300,
+                WindowState = WindowState.Normal,
+                Background = (SolidColorBrush)app.Resources["BaseBrush"],
+                Content = new Border
+                {
+                    Background = (SolidColorBrush)app.Resources["MantleBrush"],
+                    Child = new TextBlock
+                    {
+                        Text = "Scour theme preview",
+                        Foreground = (SolidColorBrush)app.Resources["TextBrush"],
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                    },
+                },
+            };
+            window.Measure(new Size(400, 300));
+            window.Arrange(new Rect(0, 0, 400, 300));
+            window.UpdateLayout();
+
+            Assert(((SolidColorBrush)app.Resources["BaseBrush"]).Color == Color.FromRgb(0x1E, 0x1E, 0x2E));
+            ThemeManager.Apply(ScourThemeMode.Latte);
+            Assert(((SolidColorBrush)app.Resources["BaseBrush"]).Color == Color.FromRgb(0xEF, 0xF1, 0xF5));
+            ThemeManager.Apply(ScourThemeMode.OLED);
+            Assert(((SolidColorBrush)app.Resources["BaseBrush"]).Color == Colors.Black);
+
+            var bitmap = new RenderTargetBitmap(400, 300, 96, 96, PixelFormats.Pbgra32);
+            bitmap.Render(window);
+            Assert(bitmap.PixelWidth == 400 && bitmap.PixelHeight == 300, "offscreen render dimensions");
+            window.Close();
+            app.Shutdown();
+        }
+        catch (Exception ex)
+        {
+            failure = ex;
+        }
+    });
+    thread.SetApartmentState(ApartmentState.STA);
+    thread.Start();
+    thread.Join();
+    if (failure != null)
+        throw failure;
 });
 
 if (failures.Count > 0)
