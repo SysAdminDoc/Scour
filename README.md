@@ -62,6 +62,7 @@ Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to in
 - **Selected size summary** - status bar shows count and total size of selected items
 - **Scan duration** and error count in status bar
 - **Per-scanner telemetry** - the progress pane reports files/s and MB/s while scanning
+- **Result pinning** - pin important findings from the context menu and keep them marked across rescans
 - **Settings persistence** - all options, window position, and excluded directories saved to `%LOCALAPPDATA%\Scour\settings.json`
 - **Windows Explorer context menu** - right-click any folder and select "Scan with Scour"
 

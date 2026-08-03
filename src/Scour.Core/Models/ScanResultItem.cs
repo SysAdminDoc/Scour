@@ -27,6 +27,20 @@ public class ScanResultItem : INotifyPropertyChanged
         }
     }
 
+    private bool _isPinned;
+    public bool IsPinned
+    {
+        get => _isPinned;
+        set
+        {
+            if (_isPinned != value)
+            {
+                _isPinned = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
     public string ParentFolder => System.IO.Path.GetDirectoryName(FullPath) ?? "";
 
     public string SizeFormatted => FormatSize(SizeBytes);

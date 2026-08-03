@@ -568,6 +568,25 @@ Run("scan progress carries telemetry fields", () =>
     Assert(progress.FilesProcessed == 7);
 });
 
+Run("pinned result store persists pin state", () =>
+{
+    var pinPath = Path.Combine(Path.GetTempPath(), $"scour-pins-test-{Guid.NewGuid():N}.json");
+    try
+    {
+        var first = new PinnedResultStore(pinPath);
+        first.SetPinned("Temp Files", Path.Combine(Path.GetTempPath(), "keep.tmp"), true);
+        var second = new PinnedResultStore(pinPath);
+        Assert(second.IsPinned("Temp Files", Path.Combine(Path.GetTempPath(), "keep.tmp")));
+        second.SetPinned("Temp Files", Path.Combine(Path.GetTempPath(), "keep.tmp"), false);
+        Assert(!new PinnedResultStore(pinPath).IsPinned("Temp Files", Path.Combine(Path.GetTempPath(), "keep.tmp")));
+    }
+    finally
+    {
+        if (File.Exists(pinPath)) File.Delete(pinPath);
+        if (File.Exists(pinPath + ".tmp")) File.Delete(pinPath + ".tmp");
+    }
+});
+
 if (failures.Count > 0)
 {
     foreach (var failure in failures)

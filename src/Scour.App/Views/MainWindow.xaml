@@ -342,6 +342,9 @@
                                 <MenuItem Header="Copy path"
                                           Command="{Binding ActiveScanner.CopyPathCommand}"
                                           CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                                <MenuItem Header="Pin / unpin result"
+                                          Command="{Binding ActiveScanner.TogglePinCommand}"
+                                          CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
                                 <Separator Background="{StaticResource Surface1Brush}"/>
                                 <MenuItem Header="Remove from list"
                                           Command="{Binding ActiveScanner.RemoveFromListCommand}"
@@ -349,6 +352,16 @@
                             </ContextMenu>
                         </DataGrid.ContextMenu>
                         <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="" Width="32" SortMemberPath="IsPinned">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="&#xE718;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                                                   Foreground="{StaticResource YellowBrush}"
+                                                   Visibility="{Binding IsPinned, Converter={StaticResource BoolToVis}}"
+                                                   ToolTip="Pinned result" HorizontalAlignment="Center"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridCheckBoxColumn Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
                                                     Width="36" Header=""/>
                             <DataGridTextColumn Binding="{Binding Name}" Header="Name" Width="200" SortDirection="Ascending"/>

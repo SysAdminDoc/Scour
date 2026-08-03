@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using Scour.Core;
 using Scour.Core.Interfaces;
+using Scour.Core.Services;
 using Scour.Scanners;
 
 namespace Scour.App.ViewModels;
@@ -18,6 +19,7 @@ public class ScannerViewModel : ViewModelBase
     private readonly Stopwatch _stopwatch = new();
     private readonly object _resultsLock = new();
     private readonly ConcurrentQueue<ScanResultItem> _streamQueue = new();
+    private readonly PinnedResultStore _pinStore;
     private DispatcherTimer? _streamTimer;
     private int _streamedFiles;
     private long _streamedBytes;
@@ -125,10 +127,12 @@ public class ScannerViewModel : ViewModelBase
     public ICommand CopyPathCommand { get; }
     public ICommand RemoveFromListCommand { get; }
     public ICommand ToggleGroupCommand { get; }
+    public ICommand TogglePinCommand { get; }
 
-    public ScannerViewModel(IScannerModule scanner)
+    public ScannerViewModel(IScannerModule scanner, PinnedResultStore? pinStore = null)
     {
         _scanner = scanner;
+        _pinStore = pinStore ?? new PinnedResultStore();
         ScanCommand = new AsyncRelayCommand(DoScan, _ => CanScan);
         CancelCommand = new RelayCommand(_ => DoCancel(), _ => IsScanning);
         DeleteCommand = new AsyncRelayCommand(DoDelete, _ => !IsScanning && SelectedCount > 0);
@@ -139,6 +143,7 @@ public class ScannerViewModel : ViewModelBase
         CopyPathCommand = new RelayCommand(DoCopyPath);
         RemoveFromListCommand = new RelayCommand(DoRemoveFromList);
         ToggleGroupCommand = new RelayCommand(_ => IsGrouped = !IsGrouped);
+        TogglePinCommand = new RelayCommand(DoTogglePin);
 
         Results.CollectionChanged += (_, e) =>
         {
@@ -214,6 +219,8 @@ public class ScannerViewModel : ViewModelBase
                 });
             }
 
+            ApplyPins();
+
             HasResults = Results.Count > 0;
             OnPropertyChanged(nameof(FolderSizeRoot));
             UpdateSelectedCount();
@@ -248,6 +255,7 @@ public class ScannerViewModel : ViewModelBase
         var batch = 0;
         while (_streamQueue.TryDequeue(out var item) && batch < 500)
         {
+            item.IsPinned = _pinStore.IsPinned(Name, item.FullPath);
             Results.Add(item);
             _streamedFiles++;
             _streamedBytes = SaturatingAdd(_streamedBytes, Math.Max(0, item.SizeBytes));
@@ -255,6 +263,30 @@ public class ScannerViewModel : ViewModelBase
         }
         if (batch > 0)
             HasResults = true;
+    }
+
+    private void DoTogglePin(object? param)
+    {
+        if (param is not ScanResultItem item)
+            return;
+
+        var pinned = !item.IsPinned;
+        try
+        {
+            _pinStore.SetPinned(Name, item.FullPath, pinned);
+            item.IsPinned = pinned;
+            StatusText = pinned ? $"Pinned: {item.Name}" : $"Unpinned: {item.Name}";
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Pin error: {ex.Message}";
+        }
+    }
+
+    private void ApplyPins()
+    {
+        foreach (var item in Results)
+            item.IsPinned = _pinStore.IsPinned(Name, item.FullPath);
     }
 
     private void UpdateTelemetry(int files, long bytes)

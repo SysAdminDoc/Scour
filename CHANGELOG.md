@@ -19,6 +19,7 @@ All notable changes to Scour will be documented in this file.
 - Added: Dependency-free `scour.exe` CLI with JSON/CSV reports, Quick/Deep/Forensic selection, dry-run quarantine previews, weekly Task Scheduler XML generation, and explicit exit codes.
 - Added: Persisted Catppuccin Mocha, Latte, and OLED theme selector in the WPF sidebar.
 - Added: Per-scanner progress telemetry with files-per-second and megabytes-per-second rates.
+- Added: Persistent result pinning with context-menu toggles and row indicators across rescans.
 
 ## [v0.3.0] - %Y->- (HEAD -> main, origin/main, origin/HEAD)
 
