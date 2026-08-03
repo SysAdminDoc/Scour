@@ -39,6 +39,7 @@ Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to in
 ### Performance
 - **Win32 P/Invoke** (`FindFirstFileW`/`FindNextFileW`) bypasses .NET System.IO overhead
 - **NTFS MFT reader** - direct Master File Table enumeration via USN journal for instant volume-wide indexing (admin required)
+- **Persistent MFT cache** - `%LOCALAPPDATA%\Scour\mft-cache.bin` stores journal checkpoints and applies USN deltas atomically between full rebuilds
 - **Parallel directory walking** at shallow depths with `Parallel.ForEachAsync`
 - **Partial hash optimization** - only full-hashes files that collide on 4KB prefix hash
 - **DataGrid virtualization** for smooth scrolling through large result sets
@@ -53,7 +54,7 @@ Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to in
 - **Export** to CSV or JSON
 - **Sortable columns** with proper numeric/date sorting
 - **Duplicate group coloring** - subtle tinted row backgrounds per duplicate group
-- **Scan All** - run all 12 scanners in parallel with one click
+- **Scan All** - run all 19 scanners in parallel with one click
 - **Selected size summary** - status bar shows count and total size of selected items
 - **Scan duration** and error count in status bar
 - **Settings persistence** - all options, window position, and excluded directories saved to `%LOCALAPPDATA%\Scour\settings.json`

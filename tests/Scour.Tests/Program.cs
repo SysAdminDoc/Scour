@@ -2,6 +2,8 @@ using System.Buffers.Binary;
 using System.Text;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Scour.Core.Native;
+using Scour.Core.Services;
 using Scour.Scanners;
 
 var failures = new List<string>();
@@ -311,6 +313,60 @@ Run("Recycle Bin scanner parses original path and deletion metadata", () =>
     finally
     {
         if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+    }
+});
+
+Run("MFT cache persists snapshots and applies USN changes", () =>
+{
+    var cachePath = Path.Combine(Path.GetTempPath(), $"scour-mft-test-{Guid.NewGuid():N}.bin");
+    try
+    {
+        var entries = new Dictionary<long, MftReader.MftEntry>
+        {
+            [5] = new MftReader.MftEntry
+            {
+                FileReferenceNumber = 5,
+                ParentFileReferenceNumber = 5,
+                FileName = "",
+                IsDirectory = true,
+                FileAttributes = 0x10,
+            },
+            [10] = new MftReader.MftEntry
+            {
+                FileReferenceNumber = 10,
+                ParentFileReferenceNumber = 5,
+                FileName = "before.txt",
+                IsDirectory = false,
+                FileAttributes = 0,
+            },
+        };
+        var snapshot = new MftReader.MftSnapshot('C', 123, 500, entries);
+        var store = new MftCacheStore(cachePath);
+        store.SaveSnapshot(snapshot);
+
+        var loaded = store.LoadSnapshot();
+        Assert(loaded != null);
+        Assert(loaded!.DriveLetter == 'C' && loaded.JournalId == 123 && loaded.NextUsn == 500);
+        Assert(loaded.Entries[10].FileName == "before.txt");
+
+        var changes = new[]
+        {
+            new MftReader.UsnChange(10, 5, "after.txt", false, 0, 0x00002000, 501),
+            new MftReader.UsnChange(11, 5, "deleted.tmp", false, 0, 0x00000200, 502),
+        };
+        loaded.Entries[11] = new MftReader.MftEntry
+        {
+            FileReferenceNumber = 11,
+            ParentFileReferenceNumber = 5,
+            FileName = "deleted.tmp",
+        };
+        MftReader.ApplyUsnChanges(loaded.Entries, changes);
+        Assert(loaded.Entries[10].FileName == "after.txt");
+        Assert(!loaded.Entries.ContainsKey(11), "USN delete must remove cached entries");
+    }
+    finally
+    {
+        if (File.Exists(cachePath)) File.Delete(cachePath);
     }
 });
 
