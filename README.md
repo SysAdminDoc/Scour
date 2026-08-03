@@ -68,6 +68,18 @@ Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to in
 - **Permanent** - bypasses recycle bin
 - **Simulate** - dry run, no files touched
 
+### CLI Automation
+
+The self-contained `scour.exe` publish supports JSON/CSV reporting and safe unattended quarantine:
+
+```powershell
+scour.exe --path C:\Data --preset Deep --json --export-csv C:\Reports\scour.csv
+scour.exe --path C:\Data --scanner "Temp Files" --dry-run --quarantine-to D:\Scour-Quarantine
+scour.exe --scheduled-task C:\Reports\ScourWeekly.xml --path C:\Data --report-dir C:\Reports
+```
+
+Exit codes are `0` for no selected findings, `1` when findings are returned, and `2` for argument, scan, export, or quarantine errors. `--quarantine-to` moves selected findings outside the scan tree; add `--dry-run` to preview those moves. `--scheduled-task` writes a weekly Task Scheduler XML template that drops a JSON report in the chosen report directory.
+
 ## Download
 
 Grab the latest release from the [Releases](https://github.com/SysAdminDoc/Scour/releases) page.
@@ -89,6 +101,9 @@ dotnet run --project src/Scour.App
 
 # Publish self-contained single-file exe
 dotnet publish src/Scour.App/Scour.App.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true --source https://api.nuget.org/v3/index.json -o ./publish
+
+# Publish the CLI
+dotnet publish src/Scour.Cli/Scour.Cli.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o ./publish/cli
 ```
 
 Requires [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) to build.
@@ -122,6 +137,7 @@ Scour/
       ViewModels/         # MainViewModel, ScannerViewModel, ViewModelBase
       Converters/         # Value converters (bool, enum, group color)
       Theme/              # Catppuccin Mocha XAML ResourceDictionary
+    Scour.Cli/            # Dependency-free JSON/CSV automation executable
 ```
 
 ## Architecture

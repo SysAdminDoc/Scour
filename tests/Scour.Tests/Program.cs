@@ -2,6 +2,7 @@ using System.Buffers.Binary;
 using System.Text;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Scour.Cli;
 using Scour.Core;
 using Scour.Core.Native;
 using Scour.Core.Services;
@@ -422,6 +423,82 @@ Run("big-file scan builds a proportional folder tree", () =>
     finally
     {
         if (Directory.Exists(rootPath)) Directory.Delete(rootPath, recursive: true);
+    }
+});
+
+Run("CLI emits JSON and supports dry-run and quarantine", () =>
+{
+    var rootPath = Path.Combine(Path.GetTempPath(), $"scour-cli-test-{Guid.NewGuid():N}");
+    var quarantinePath = Path.Combine(Path.GetTempPath(), $"scour-cli-quarantine-{Guid.NewGuid():N}");
+    var csvPath = Path.Combine(Path.GetTempPath(), $"scour-cli-report-{Guid.NewGuid():N}.csv");
+    Directory.CreateDirectory(rootPath);
+    var tempFile = Path.Combine(rootPath, "remove-me.tmp");
+    File.WriteAllText(tempFile, "temporary");
+    try
+    {
+        var dryRunOptions = CliParser.Parse(
+        [
+            "--path", rootPath,
+            "--scanner", "Temp Files",
+            "--json",
+            "--dry-run",
+            "--quarantine-to", quarantinePath,
+        ]);
+        var dryRun = CliRunner.ExecuteAsync(dryRunOptions).GetAwaiter().GetResult();
+        Assert(dryRun.ExitCode == 1, "dry-run should report findings");
+        Assert(dryRun.Actions.Single().Status == "would-quarantine");
+        Assert(File.Exists(tempFile), "dry-run must preserve the source");
+        Assert(!Directory.Exists(quarantinePath), "dry-run must not create quarantine storage");
+        Assert(CliRunner.ToJson(dryRun).Contains("Temp Files", StringComparison.Ordinal));
+
+        var actualOptions = CliParser.Parse(
+        [
+            "--path", rootPath,
+            "--scanner", "Temp Files",
+            "--quarantine-to", quarantinePath,
+            "--export-csv", csvPath,
+        ]);
+        var actual = CliRunner.ExecuteAsync(actualOptions).GetAwaiter().GetResult();
+        Assert(actual.Actions.Single().Status == "quarantined");
+        Assert(!File.Exists(tempFile), "quarantine should move the source");
+        Assert(File.Exists(Path.Combine(quarantinePath, "remove-me.tmp")));
+        Assert(File.ReadAllText(csvPath).Contains("remove-me.tmp", StringComparison.Ordinal));
+    }
+    finally
+    {
+        if (Directory.Exists(rootPath)) Directory.Delete(rootPath, recursive: true);
+        if (Directory.Exists(quarantinePath)) Directory.Delete(quarantinePath, recursive: true);
+        if (File.Exists(csvPath)) File.Delete(csvPath);
+    }
+});
+
+Run("CLI writes a weekly scheduled-task template", () =>
+{
+    var rootPath = Path.Combine(Path.GetTempPath(), $"scour-task-root-{Guid.NewGuid():N}");
+    var taskPath = Path.Combine(Path.GetTempPath(), $"scour-task-{Guid.NewGuid():N}.xml");
+    var reportPath = Path.Combine(Path.GetTempPath(), $"scour-task-reports-{Guid.NewGuid():N}");
+    Directory.CreateDirectory(rootPath);
+    try
+    {
+        var options = CliParser.Parse(
+        [
+            "--scheduled-task", taskPath,
+            "--path", rootPath,
+            "--preset", "Deep",
+            "--report-dir", reportPath,
+        ]);
+        ScheduledTaskTemplate.Write(taskPath, options.RootPath, options.Preset, options.ReportDirectory!);
+        var xml = File.ReadAllText(taskPath);
+        Assert(xml.Contains("CalendarTrigger", StringComparison.Ordinal));
+        Assert(xml.Contains("<Sunday", StringComparison.Ordinal));
+        Assert(xml.Contains("--preset Deep", StringComparison.Ordinal));
+        Assert(xml.Contains("scour-weekly.json", StringComparison.Ordinal));
+    }
+    finally
+    {
+        if (Directory.Exists(rootPath)) Directory.Delete(rootPath, recursive: true);
+        if (File.Exists(taskPath)) File.Delete(taskPath);
+        if (Directory.Exists(reportPath)) Directory.Delete(reportPath, recursive: true);
     }
 });
 

@@ -8,10 +8,6 @@ Future direction for Scour, a Win32/MFT-powered disk cleanup utility. Focus: mor
 ### Engine & performance
 
 ### CLI, automation, scripting
-- `scour.exe` CLI with JSON output mode for PowerShell/SCCM/Intune pipelines
-- `--dry-run` / `--export-csv` / `--quarantine-to` flags for unattended runs
-- Exit codes aligned with SystemUpdatePro conventions (0 clean, 1 items found, >1 error)
-- Scheduled task template generator for weekly automatic scans with report drop
 
 ### UI/UX
 - Dark + Light + OLED theme toggle (Catppuccin Latte for light)

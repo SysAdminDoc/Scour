@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Scour.Core\Scour.Core.csproj" />
     <ProjectReference Include="..\..\src\Scour.Scanners\Scour.Scanners.csproj" />
+    <ProjectReference Include="..\..\src\Scour.Cli\Scour.Cli.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
