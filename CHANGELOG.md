@@ -15,6 +15,7 @@ All notable changes to Scour will be documented in this file.
 - Added: Persistent MFT cache with atomic snapshots and USN-journal delta refresh with full-enumeration fallback.
 - Added: Optional dependency-free BLAKE3 full-hash backend for duplicate detection, selectable alongside the SHA256 default.
 - Added: Quick, Deep, and Forensic scan presets with persisted bundle selection for Scan All.
+- Added: Big Files Treemap tab with proportional folder-size layout and direct-file buckets.
 
 ## [v0.3.0] - %Y->- (HEAD -> main, origin/main, origin/HEAD)
 

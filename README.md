@@ -25,7 +25,7 @@ Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to in
 | **Game Orphans** | Compare Steam, Epic, and GOG install records with on-disk game directories |
 | **VHDX Bloat** | Inspect Docker Desktop and WSL virtual disks before an explicit compact action |
 | **Recycle Bin** | Inspect deleted items by volume, original path, deletion time, and user SID |
-| **Big Files** | Top 100 largest files via min-heap (O(n log N)) |
+| **Big Files** | Top 100 largest files via min-heap (O(n log N)) plus proportional folder sizes in the Treemap tab |
 | **Temp Files** | Pattern-based detection (.tmp, .bak, .log, Office lock files, macOS metadata, etc.) |
 | **Zero-Length Files** | Find 0-byte empty files cluttering your filesystem |
 | **Old Files** | Files not modified in 365+ days |
@@ -44,6 +44,7 @@ Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to in
 - **Partial hash optimization** - only full-hashes files that collide on 4KB prefix hash
 - **Optional BLAKE3 backend** - portable managed implementation with no package dependency; SHA256 remains the default compatibility option
 - **DataGrid virtualization** for smooth scrolling through large result sets
+- **Folder-size treemap** - Big Files builds a proportional folder tree and renders it in an alternate tab with bounded layout depth
 - **Long path support** via `\\?\` prefix (handles paths > 260 chars)
 
 ### UI/UX
@@ -99,9 +100,9 @@ Scour/
   src/
     Scour.Core/           # Core library - models, interfaces, services
       Interfaces/         # IScannerModule contract
-      Models/             # ScanConfig, ScanResultItem, DeleteMode
+      Models/             # ScanConfig, ScanResultItem, FolderSizeNode, ScanPreset, DeleteMode
       Native/             # Win32 P/Invoke, NTFS MFT reader
-      Services/           # FileSystemWalker, FileHasher, Blake3Hasher, DeletionService, AppSettings, ContextMenuService
+      Services/           # FileSystemWalker, FileHasher, Blake3Hasher, TreemapLayout, DeletionService, AppSettings, ContextMenuService
     Scour.Scanners/       # Scanner implementations (19 modules)
       ScannerBase.cs      # Shared base class (deletion, reset)
       EmptyDirectoryScanner.cs

@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using Scour.Core;
 using Scour.Core.Interfaces;
+using Scour.Scanners;
 
 namespace Scour.App.ViewModels;
 
@@ -25,6 +26,11 @@ public class ScannerViewModel : ViewModelBase
     public string IconGlyph => _scanner.IconGlyph;
     public string DeleteActionLabel => _scanner.DeleteActionLabel;
     public IReadOnlyList<ColumnDefinition> Columns => _scanner.ResultColumns;
+    public bool IsBigFileScanner => _scanner is BigFileScanner;
+    public FolderSizeNode? FolderSizeRoot => (_scanner as BigFileScanner)?.FolderSizeRoot;
+
+    private int _treemapTabIndex;
+    public int TreemapTabIndex { get => _treemapTabIndex; set => SetProperty(ref _treemapTabIndex, value); }
 
     private string _statusText = "Ready";
     public string StatusText { get => _statusText; set => SetProperty(ref _statusText, value); }
@@ -129,6 +135,7 @@ public class ScannerViewModel : ViewModelBase
         IsScanning = true;
         Results.Clear();
         _scanner.Reset();
+        OnPropertyChanged(nameof(FolderSizeRoot));
         HasResults = false;
         Progress = 0;
         ErrorCount = 0;
@@ -177,6 +184,7 @@ public class ScannerViewModel : ViewModelBase
             }
 
             HasResults = Results.Count > 0;
+            OnPropertyChanged(nameof(FolderSizeRoot));
             UpdateSelectedCount();
         }
         catch (OperationCanceledException)

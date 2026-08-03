@@ -51,5 +51,5 @@ public abstract class ScannerBase : IScannerModule
         }, ct);
     }
 
-    public void Reset() => _results.Clear();
+    public virtual void Reset() => _results.Clear();
 }

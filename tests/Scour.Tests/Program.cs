@@ -393,6 +393,38 @@ Run("scan presets expose bounded scanner bundles", () =>
     Assert(ScanPresetCatalog.GetDefinition(ScanPreset.Forensic).ScannerNames.Count == 19, "forensic scanner count");
 });
 
+Run("big-file scan builds a proportional folder tree", () =>
+{
+    var rootPath = Path.Combine(Path.GetTempPath(), $"scour-treemap-test-{Guid.NewGuid():N}");
+    var childPath = Path.Combine(rootPath, "Projects");
+    Directory.CreateDirectory(childPath);
+    try
+    {
+        File.WriteAllBytes(Path.Combine(rootPath, "root.bin"), new byte[64]);
+        File.WriteAllBytes(Path.Combine(childPath, "project.bin"), new byte[192]);
+
+        var scanner = new BigFileScanner();
+        scanner.ScanAsync(
+                new ScanConfig { RootPath = rootPath, SkipSystem = false },
+                new Progress<Scour.Core.Interfaces.ScanProgress>(),
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+
+        Assert(scanner.FolderSizeRoot != null);
+        Assert(scanner.FolderSizeRoot!.SizeBytes == 256, $"root size was {scanner.FolderSizeRoot.SizeBytes}");
+        Assert(scanner.FolderSizeRoot.Children.Any(child => child.Name == "Projects" && child.SizeBytes == 192));
+
+        var rectangles = TreemapLayout.Layout(scanner.FolderSizeRoot, 1000, 500);
+        Assert(rectangles.Count >= 2, "expected folder and direct-file rectangles");
+        Assert(rectangles.All(rectangle => rectangle.Width >= 0 && rectangle.Height >= 0));
+    }
+    finally
+    {
+        if (Directory.Exists(rootPath)) Directory.Delete(rootPath, recursive: true);
+    }
+});
+
 if (failures.Count > 0)
 {
     foreach (var failure in failures)

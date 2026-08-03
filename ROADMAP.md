@@ -6,7 +6,6 @@ Future direction for Scour, a Win32/MFT-powered disk cleanup utility. Focus: mor
 
 ### New scanners
 ### Engine & performance
-- Folder size treemap view (WizTree-style) as an alternate tab on Big Files
 
 ### CLI, automation, scripting
 - `scour.exe` CLI with JSON output mode for PowerShell/SCCM/Intune pipelines
