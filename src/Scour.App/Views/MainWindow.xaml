@@ -287,12 +287,18 @@
                     </StackPanel>
 
                     <!-- Results and treemap views -->
-                    <TabControl Grid.Row="2" Margin="12,0,12,8"
-                                Background="Transparent" Foreground="{StaticResource TextBrush}"
-                                BorderBrush="{StaticResource Surface0Brush}"
-                                SelectedIndex="{Binding ActiveScanner.TreemapTabIndex}">
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="300"/>
+                        </Grid.ColumnDefinitions>
+                        <TabControl Grid.Column="0" Margin="12,0,8,8"
+                                    Background="Transparent" Foreground="{StaticResource TextBrush}"
+                                    BorderBrush="{StaticResource Surface0Brush}"
+                                    SelectedIndex="{Binding ActiveScanner.TreemapTabIndex}">
                         <TabItem Header="Files">
                             <DataGrid x:Name="dgResults"
+                                      SelectedItem="{Binding ActiveScanner.HighlightedResult, Mode=TwoWay}"
                                       ItemsSource="{Binding ActiveScanner.FilteredResults}"
                                       Style="{StaticResource DarkDataGrid}"
                                       ColumnHeaderStyle="{StaticResource DarkColumnHeader}"
@@ -399,7 +405,44 @@
                             <controls:FolderTreemapControl Root="{Binding ActiveScanner.FolderSizeRoot}"
                                                            Margin="4"/>
                         </TabItem>
-                    </TabControl>
+                        </TabControl>
+
+                        <!-- Explanation panel -->
+                        <Border Grid.Column="1" Background="{StaticResource MantleBrush}"
+                                BorderBrush="{StaticResource Surface0Brush}" BorderThickness="1"
+                                CornerRadius="6" Margin="0,4,12,8" Padding="14"
+                                Visibility="{Binding ActiveScanner.HasHighlightedResult, Converter={StaticResource BoolToVis}}">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel>
+                                    <TextBlock Text="WHY IS THIS FLAGGED?" FontSize="10" FontWeight="Bold"
+                                               Foreground="{StaticResource Overlay1Brush}" Margin="0,0,0,10"/>
+                                    <TextBlock Text="{Binding ActiveScanner.HighlightedExplanation.Title}" FontSize="14"
+                                               FontWeight="SemiBold" Foreground="{StaticResource TextBrush}"
+                                               TextWrapping="Wrap" Margin="0,0,0,12"/>
+                                    <TextBlock Text="RULE" FontSize="9" FontWeight="Bold"
+                                               Foreground="{StaticResource Overlay1Brush}"/>
+                                    <TextBlock Text="{Binding ActiveScanner.HighlightedExplanation.Rule}" FontSize="11"
+                                               Foreground="{StaticResource Subtext1Brush}" TextWrapping="Wrap" Margin="0,3,0,10"/>
+                                    <TextBlock Text="REASON" FontSize="9" FontWeight="Bold"
+                                               Foreground="{StaticResource Overlay1Brush}"/>
+                                    <TextBlock Text="{Binding ActiveScanner.HighlightedExplanation.Reason}" FontSize="11"
+                                               Foreground="{StaticResource Subtext1Brush}" TextWrapping="Wrap" Margin="0,3,0,10"/>
+                                    <TextBlock Text="SAFETY" FontSize="9" FontWeight="Bold"
+                                               Foreground="{StaticResource Overlay1Brush}"/>
+                                    <TextBlock Text="{Binding ActiveScanner.HighlightedExplanation.Safety}" FontSize="11"
+                                               Foreground="{StaticResource YellowBrush}" TextWrapping="Wrap" Margin="0,3,0,10"/>
+                                    <TextBlock Text="SUGGESTED ACTION" FontSize="9" FontWeight="Bold"
+                                               Foreground="{StaticResource Overlay1Brush}"/>
+                                    <TextBlock Text="{Binding ActiveScanner.HighlightedExplanation.SuggestedAction}" FontSize="11"
+                                               Foreground="{StaticResource GreenBrush}" TextWrapping="Wrap" Margin="0,3,0,10"/>
+                                    <TextBlock Text="PATH" FontSize="9" FontWeight="Bold"
+                                               Foreground="{StaticResource Overlay1Brush}"/>
+                                    <TextBlock Text="{Binding ActiveScanner.HighlightedResult.FullPath}" FontSize="10"
+                                               Foreground="{StaticResource Subtext0Brush}" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Border>
+                    </Grid>
 
                     <!-- Empty state -->
                     <StackPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center"

@@ -36,6 +36,25 @@ public class ScannerViewModel : ViewModelBase
     private int _treemapTabIndex;
     public int TreemapTabIndex { get => _treemapTabIndex; set => SetProperty(ref _treemapTabIndex, value); }
 
+    private ScanResultItem? _highlightedResult;
+    public ScanResultItem? HighlightedResult
+    {
+        get => _highlightedResult;
+        set
+        {
+            if (SetProperty(ref _highlightedResult, value))
+            {
+                OnPropertyChanged(nameof(HasHighlightedResult));
+                OnPropertyChanged(nameof(HighlightedExplanation));
+            }
+        }
+    }
+
+    public bool HasHighlightedResult => HighlightedResult != null;
+    public FindingExplanation? HighlightedExplanation => HighlightedResult == null
+        ? null
+        : FindingExplanationService.Explain(Name, HighlightedResult);
+
     private string _statusText = "Ready";
     public string StatusText { get => _statusText; set => SetProperty(ref _statusText, value); }
 
@@ -165,6 +184,7 @@ public class ScannerViewModel : ViewModelBase
         _cts = new CancellationTokenSource();
         IsScanning = true;
         Results.Clear();
+        HighlightedResult = null;
         _scanner.Reset();
         OnPropertyChanged(nameof(FolderSizeRoot));
         HasResults = false;

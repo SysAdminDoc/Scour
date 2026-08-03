@@ -10,7 +10,6 @@ Future direction for Scour, a Win32/MFT-powered disk cleanup utility. Focus: mor
 ### CLI, automation, scripting
 
 ### UI/UX
-- "Why is this flagged?" explain-panel per row for debloat-script authoring
 
 ## Competitive Research
 

@@ -345,7 +345,8 @@ public class MainViewModel : ViewModelBase
             r.Detail,
             r.Group,
             r.IsSelected,
-            r.IsDirectory
+            r.IsDirectory,
+            Explanation = FindingExplanationService.Explain(ActiveScanner.Name, r)
         }).ToList();
 
         var json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });

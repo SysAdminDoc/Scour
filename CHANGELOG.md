@@ -20,6 +20,7 @@ All notable changes to Scour will be documented in this file.
 - Added: Persisted Catppuccin Mocha, Latte, and OLED theme selector in the WPF sidebar.
 - Added: Per-scanner progress telemetry with files-per-second and megabytes-per-second rates.
 - Added: Persistent result pinning with context-menu toggles and row indicators across rescans.
+- Added: Per-result finding explanations with scanner rules, reasons, safety guidance, and suggested actions in the WPF panel and JSON export.
 
 ## [v0.3.0] - %Y->- (HEAD -> main, origin/main, origin/HEAD)
 

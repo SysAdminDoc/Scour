@@ -587,6 +587,22 @@ Run("pinned result store persists pin state", () =>
     }
 });
 
+Run("finding explanations include scanner rules and safety guidance", () =>
+{
+    var item = new ScanResultItem
+    {
+        FullPath = @"C:\Temp\candidate.tmp",
+        Name = "candidate.tmp",
+        Detail = "extension: .tmp",
+        SizeBytes = 12,
+        IsSelected = true,
+    };
+    var explanation = FindingExplanationService.Explain("Temp Files", item);
+    Assert(explanation.Rule.Contains("temporary", StringComparison.OrdinalIgnoreCase));
+    Assert(explanation.Reason.Contains("extension: .tmp", StringComparison.Ordinal));
+    Assert(explanation.Safety.Contains("Selected by default", StringComparison.Ordinal));
+});
+
 if (failures.Count > 0)
 {
     foreach (var failure in failures)
