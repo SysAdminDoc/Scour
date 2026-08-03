@@ -112,6 +112,7 @@ public class MainViewModel : ViewModelBase
             new EmptyDirectoryScanner(),
             new DuplicateFileScanner(),
             new MediaDuplicateScanner(),
+            new WinSxSScanner(),
             new BigFileScanner(),
             new TempFileScanner(),
             new ZeroLengthFileScanner(),

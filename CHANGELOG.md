@@ -6,6 +6,7 @@ All notable changes to Scour will be documented in this file.
 
 - Added: Media Duplicates scanner with WIC image dHashing, bounded video perceptual buckets, container dimensions, and safe duplicate selection.
 - Added: Dependency-free executable scanner test harness with end-to-end media grouping coverage.
+- Added: Audit-only WinSxS analysis for stale servicing workspaces and DISM-reported reclaimable component data.
 
 ## [v0.3.0] - %Y->- (HEAD -> main, origin/main, origin/HEAD)
 

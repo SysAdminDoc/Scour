@@ -93,6 +93,36 @@ Run("media scanner groups similar PNGs and keeps one", () =>
     }
 });
 
+Run("WinSxS scanner reports stale servicing data as protected", () =>
+{
+    var directory = Path.Combine(Path.GetTempPath(), $"scour-winsxs-test-{Guid.NewGuid():N}");
+    var installTemp = Path.Combine(directory, "InstallTemp");
+    Directory.CreateDirectory(installTemp);
+    try
+    {
+        var marker = Path.Combine(installTemp, "stale.tmp");
+        File.WriteAllText(marker, "servicing residue");
+        Directory.SetLastWriteTime(installTemp, DateTime.Now.AddDays(-14));
+        File.SetLastWriteTime(marker, DateTime.Now.AddDays(-14));
+
+        var scanner = new WinSxSScanner(directory);
+        scanner.ScanAsync(
+                new Scour.Core.ScanConfig { RootPath = directory, SkipSystem = false },
+                new Progress<Scour.Core.Interfaces.ScanProgress>(),
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+
+        var finding = scanner.Results.Single(item => item.Name == "InstallTemp");
+        Assert(!finding.IsSelected, "WinSxS findings must never be selected by default");
+        Assert(finding.Detail.Contains("audit only", StringComparison.OrdinalIgnoreCase));
+    }
+    finally
+    {
+        if (Directory.Exists(directory)) Directory.Delete(directory, recursive: true);
+    }
+});
+
 if (failures.Count > 0)
 {
     foreach (var failure in failures)
