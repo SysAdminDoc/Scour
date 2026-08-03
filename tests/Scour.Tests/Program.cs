@@ -198,6 +198,44 @@ Run("system scanner surfaces protected storage actions", () =>
     }
 });
 
+Run("game scanner finds a Steam directory without a manifest", () =>
+{
+    var library = Path.Combine(Path.GetTempPath(), $"scour-steam-test-{Guid.NewGuid():N}");
+    var steamApps = Path.Combine(library, "steamapps");
+    var common = Path.Combine(steamApps, "common");
+    Directory.CreateDirectory(common);
+    try
+    {
+        var installed = Path.Combine(common, "Tracked Game");
+        var orphan = Path.Combine(common, "Old Game");
+        Directory.CreateDirectory(installed);
+        Directory.CreateDirectory(orphan);
+        File.WriteAllText(Path.Combine(installed, "tracked.exe"), "tracked");
+        File.WriteAllText(Path.Combine(orphan, "old.exe"), "old");
+        File.WriteAllText(Path.Combine(steamApps, "appmanifest_100.acf"),
+            "\"AppState\" { \"appid\" \"100\" \"name\" \"Tracked Game\" \"installdir\" \"Tracked Game\" }");
+
+        var scanner = new GameOrphanScanner(
+            steamLibraryRoots: [library],
+            epicManifestRoots: [],
+            gogInstallRoots: []);
+        scanner.ScanAsync(
+                new Scour.Core.ScanConfig { RootPath = library, SkipSystem = false },
+                new Progress<Scour.Core.Interfaces.ScanProgress>(),
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+
+        Assert(scanner.Results.Count == 1, $"result count was {scanner.Results.Count}");
+        Assert(scanner.Results[0].Name == "Old Game");
+        Assert(!scanner.Results[0].IsSelected, "orphaned game directories require review before deletion");
+    }
+    finally
+    {
+        if (Directory.Exists(library)) Directory.Delete(library, recursive: true);
+    }
+});
+
 if (failures.Count > 0)
 {
     foreach (var failure in failures)

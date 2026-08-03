@@ -9,6 +9,7 @@ All notable changes to Scour will be documented in this file.
 - Added: Audit-only WinSxS analysis for stale servicing workspaces and DISM-reported reclaimable component data.
 - Added: Browser cache scanner with Chrome, Edge, Brave, and Firefox profile-level cache breakdowns.
 - Added: Protected System Space scanner for hibernation, pagefile, swapfile, and crash-dump storage actions.
+- Added: Game Orphans scanner comparing Steam, Epic, and GOG install records with game library directories.
 
 ## [v0.3.0] - %Y->- (HEAD -> main, origin/main, origin/HEAD)
 

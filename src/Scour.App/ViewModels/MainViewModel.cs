@@ -115,6 +115,7 @@ public class MainViewModel : ViewModelBase
             new WinSxSScanner(),
             new BrowserCacheScanner(),
             new SystemSpaceScanner(),
+            new GameOrphanScanner(),
             new BigFileScanner(),
             new TempFileScanner(),
             new ZeroLengthFileScanner(),
