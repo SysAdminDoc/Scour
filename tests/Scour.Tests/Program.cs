@@ -236,6 +236,42 @@ Run("game scanner finds a Steam directory without a manifest", () =>
     }
 });
 
+Run("VHDX scanner inventories large virtual disks without mutating them", () =>
+{
+    var root = Path.Combine(Path.GetTempPath(), $"scour-vhdx-test-{Guid.NewGuid():N}");
+    Directory.CreateDirectory(root);
+    var vhdx = Path.Combine(root, "docker_data.vhdx");
+    try
+    {
+        File.WriteAllBytes(vhdx, new byte[4096]);
+        var scanner = new VhdxBloatScanner([root], minimumSizeBytes: 1024);
+        scanner.ScanAsync(
+                new Scour.Core.ScanConfig { RootPath = root, SkipSystem = false },
+                new Progress<Scour.Core.Interfaces.ScanProgress>(),
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+
+        Assert(scanner.Results.Count == 1, $"result count was {scanner.Results.Count}");
+        Assert(scanner.Results[0].Name == "docker_data.vhdx");
+        Assert(scanner.Results[0].Detail.Contains("Docker", StringComparison.OrdinalIgnoreCase));
+        Assert(!scanner.Results[0].IsSelected, "VHDX compaction requires explicit selection");
+
+        scanner.DeleteSelectedAsync(
+                scanner.Results,
+                Scour.Core.DeleteMode.Simulate,
+                new Progress<Scour.Core.Interfaces.ScanProgress>(),
+                CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+        Assert(File.Exists(vhdx), "simulate compaction must not remove the VHDX");
+    }
+    finally
+    {
+        if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+    }
+});
+
 if (failures.Count > 0)
 {
     foreach (var failure in failures)

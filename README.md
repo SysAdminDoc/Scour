@@ -13,7 +13,7 @@ Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to in
 
 ## Features
 
-### 17 Built-in Scanners
+### 18 Built-in Scanners
 | Scanner | Description |
 |---------|-------------|
 | **Empty Folders** | Bottom-up detection of truly empty directories (handles nested empties) |
@@ -23,6 +23,7 @@ Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to in
 | **Browser Cache** | Find disposable Chrome, Edge, Brave, and Firefox cache data with profile-level breakdowns |
 | **System Space** | Surface hibernation, pagefile, swapfile, and crash-dump storage with protected system actions |
 | **Game Orphans** | Compare Steam, Epic, and GOG install records with on-disk game directories |
+| **VHDX Bloat** | Inspect Docker Desktop and WSL virtual disks before an explicit compact action |
 | **Big Files** | Top 100 largest files via min-heap (O(n log N)) |
 | **Temp Files** | Pattern-based detection (.tmp, .bak, .log, Office lock files, macOS metadata, etc.) |
 | **Zero-Length Files** | Find 0-byte empty files cluttering your filesystem |

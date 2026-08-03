@@ -5,7 +5,6 @@ Future direction for Scour, a Win32/MFT-powered disk cleanup utility. Focus: mor
 ## Planned Features
 
 ### New scanners
-- Docker/WSL vhdx bloat analyzer with compact-vhd integration
 - Recycle Bin introspection (per-volume `$Recycle.Bin` enumeration with original path + user SID resolution)
 
 ### Engine & performance
