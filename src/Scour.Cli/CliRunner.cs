@@ -10,7 +10,7 @@ namespace Scour.Cli;
 
 public static class CliRunner
 {
-    public static IReadOnlyList<IScannerModule> CreateScanners() =>
+    private static IReadOnlyList<IScannerModule> CreateBuiltInScanners() =>
     [
         new EmptyDirectoryScanner(),
         new DuplicateFileScanner(),
@@ -33,6 +33,9 @@ public static class CliRunner
         new OrphanedAppDataScanner(),
     ];
 
+    public static IReadOnlyList<IScannerModule> CreateScanners()
+        => [.. CreateBuiltInScanners().Concat(PluginCatalog.Discover().Modules)];
+
     public static async Task<CliExecutionResult> ExecuteAsync(
         CliOptions options,
         CancellationToken ct = default,
@@ -42,9 +45,11 @@ public static class CliRunner
         if (!Directory.Exists(rootPath))
             throw new CliArgumentException($"Scan path does not exist: {rootPath}");
 
-        var modules = CreateScanners();
+        var pluginDiscovery = PluginCatalog.Discover();
+        var modules = CreateBuiltInScanners().Concat(pluginDiscovery.Modules).ToList();
         var selectedModules = SelectScanners(modules, options);
         var errors = new List<string>();
+        errors.AddRange(pluginDiscovery.Errors.Select(error => $"Plugin: {error}"));
         var scannerReports = new List<CliScannerReport>();
         var items = new List<CliItemReport>();
         IReadOnlySet<string>? changedPaths = null;

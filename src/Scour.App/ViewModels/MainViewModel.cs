@@ -178,8 +178,8 @@ public class MainViewModel : ViewModelBase
         _contextMenuRegistered = ContextMenuService.IsRegistered();
 
         // Register all scanner modules
-        IScannerModule[] modules =
-        [
+        var modules = new List<IScannerModule>
+        {
             new EmptyDirectoryScanner(),
             new DuplicateFileScanner(),
             new MediaDuplicateScanner(),
@@ -199,7 +199,8 @@ public class MainViewModel : ViewModelBase
             new LockedFileScanner(),
             new DuplicateArchiveScanner(),
             new OrphanedAppDataScanner(),
-        ];
+        };
+        modules.AddRange(PluginCatalog.Discover().Modules);
 
         foreach (var m in modules)
             Scanners.Add(new ScannerViewModel(m));

@@ -89,6 +89,23 @@ scour.exe --scheduled-task C:\Reports\ScourWeekly.xml --path C:\Data --report-di
 
 `--tui` opens the built-in Windows Terminal interface. Use `scan`, `path <directory>`, `preset <Quick|Deep|Forensic>`, `scanner <name[,name...]>`, `json`, and `quit` at its prompt. The ready-to-import profile fragment is [`tools/scour-terminal-profile.json`](tools/scour-terminal-profile.json). Exit codes are `0` for no selected findings, `1` when findings are returned, and `2` for argument, scan, export, or quarantine errors. `--quarantine-to` moves selected findings outside the scan tree; add `--dry-run` to preview those moves. `--since-last-run` refreshes the persistent MFT checkpoint and uses the USN delta when valid, otherwise safely falling back to a full scan. `--scheduled-task` writes a weekly Task Scheduler XML template that drops a JSON report in the chosen report directory.
 
+### Plugin Manifests
+
+Drop a plugin assembly and `scour-plugin.json` into `%LOCALAPPDATA%\Scour\Plugins` (or the portable `data\Plugins` folder):
+
+```json
+{
+  "manifestVersion": 1,
+  "id": "example.large-files",
+  "name": "Example Large Files",
+  "version": "1.0.0",
+  "assembly": "Example.LargeFiles.dll",
+  "type": "Example.LargeFilesScanner"
+}
+```
+
+The loader accepts only relative DLL paths that remain inside the plugin directory, and plugin scanners must implement `IScannerModule` with a public parameterless constructor. Explicit CLI `--scanner` selection and the WPF scanner list include successfully loaded modules; malformed manifests are reported as scan errors.
+
 ## Download
 
 Grab the latest release from the [Releases](https://github.com/SysAdminDoc/Scour/releases) page.
@@ -126,7 +143,7 @@ Scour/
       Interfaces/         # IScannerModule contract
       Models/             # ScanConfig, ScanResultItem, FolderSizeNode, ScanPreset, DeleteMode
       Native/             # Win32 P/Invoke, NTFS MFT reader
-      Services/           # FileSystemWalker, FileHasher, Blake3Hasher, TreemapLayout, DeletionService, AppSettings, ContextMenuService
+      Services/           # FileSystemWalker, FileHasher, Blake3Hasher, TreemapLayout, DeletionService, AppSettings, AppRuntime, PluginCatalog
     Scour.Scanners/       # Scanner implementations (19 modules)
       ScannerBase.cs      # Shared base class (deletion, reset)
       EmptyDirectoryScanner.cs

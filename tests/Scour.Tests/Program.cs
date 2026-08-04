@@ -396,6 +396,7 @@ Run("scan presets expose bounded scanner bundles", () =>
     Assert(ScanPresetCatalog.Includes(ScanPreset.Deep, "Duplicate Files"), "deep duplicate files");
     Assert(!ScanPresetCatalog.Includes(ScanPreset.Deep, "WinSxS Analysis"), "deep excludes system audit");
     Assert(ScanPresetCatalog.GetDefinition(ScanPreset.Forensic).ScannerNames.Count == 19, "forensic scanner count");
+    Assert(ScanPresetCatalog.Includes(ScanPreset.Forensic, "Third-Party Scanner"), "forensic includes plugins");
 });
 
 Run("big-file scan builds a proportional folder tree", () =>
@@ -710,6 +711,26 @@ Run("TUI executes a scan through the CLI engine without keyboard injection", () 
     finally
     {
         if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+    }
+});
+
+Run("plugin manifests validate paths and report malformed entries", () =>
+{
+    var directory = Path.Combine(Path.GetTempPath(), $"scour-plugin-test-{Guid.NewGuid():N}");
+    Directory.CreateDirectory(directory);
+    try
+    {
+        File.WriteAllText(
+            Path.Combine(directory, PluginCatalog.ManifestFileName),
+            "{\"manifestVersion\":1,\"id\":\"bad.plugin\",\"name\":\"Bad Plugin\",\"version\":\"1.0.0\",\"assembly\":\"..\\\\outside.dll\"}");
+        var discovery = PluginCatalog.Discover(directory);
+        Assert(discovery.Modules.Count == 0, $"module count was {discovery.Modules.Count}");
+        Assert(discovery.Errors.Count == 1, $"error count was {discovery.Errors.Count}");
+        Assert(discovery.Errors[0].Contains("inside the plugin directory", StringComparison.Ordinal), discovery.Errors[0]);
+    }
+    finally
+    {
+        if (Directory.Exists(directory)) Directory.Delete(directory, recursive: true);
     }
 });
 

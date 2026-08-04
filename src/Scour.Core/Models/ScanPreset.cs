@@ -84,7 +84,7 @@ public static class ScanPresetCatalog
         => Definitions[preset];
 
     public static bool Includes(ScanPreset preset, string scannerName)
-        => GetDefinition(preset).ScannerNames.Contains(scannerName);
+        => preset == ScanPreset.Forensic || GetDefinition(preset).ScannerNames.Contains(scannerName);
 
     private static IReadOnlySet<string> CreateSet(params string[] names)
         => new HashSet<string>(names, StringComparer.OrdinalIgnoreCase);
