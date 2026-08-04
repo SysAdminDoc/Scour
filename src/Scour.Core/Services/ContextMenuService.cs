@@ -17,6 +17,9 @@ public static class ContextMenuService
     /// </summary>
     public static bool IsRegistered()
     {
+        if (AppRuntime.IsPortable)
+            return false;
+
         try
         {
             using var key = Registry.CurrentUser.OpenSubKey(@"Software\Classes\" + DirShellKey);
@@ -31,6 +34,9 @@ public static class ContextMenuService
     /// </summary>
     public static void Register()
     {
+        if (AppRuntime.IsPortable)
+            return;
+
         var exePath = GetExePath();
         if (string.IsNullOrEmpty(exePath)) return;
 
@@ -46,6 +52,9 @@ public static class ContextMenuService
     /// </summary>
     public static void Unregister()
     {
+        if (AppRuntime.IsPortable)
+            return;
+
         TryDeleteKey(@"Software\Classes\" + DirShellKey);
         TryDeleteKey(@"Software\Classes\" + DirBgShellKey);
         TryDeleteKey(@"Software\Classes\" + DriveShellKey);

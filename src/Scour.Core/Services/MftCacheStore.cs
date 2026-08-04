@@ -29,10 +29,7 @@ public sealed class MftCacheStore
         => TryLoad();
 
     public static string GetDefaultCachePath()
-        => Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "Scour",
-            "mft-cache.bin");
+        => Path.Combine(AppRuntime.DataDirectory, "mft-cache.bin");
 
     public Task<MftCacheRefreshResult> RefreshAsync(
         char driveLetter,

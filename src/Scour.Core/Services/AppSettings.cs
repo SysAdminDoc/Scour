@@ -29,9 +29,7 @@ public class AppSettings
     public double WindowLeft { get; set; } = double.NaN;
     public double WindowTop { get; set; } = double.NaN;
 
-    private static readonly string SettingsPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "Scour", "settings.json");
+    private static string SettingsPath => Path.Combine(AppRuntime.DataDirectory, "settings.json");
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {

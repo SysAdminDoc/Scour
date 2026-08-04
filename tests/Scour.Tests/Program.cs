@@ -672,6 +672,22 @@ Run("USN delta scope limits recursive scanners to changed paths", () =>
     }
 });
 
+Run("portable mode detects a marker without touching the registry", () =>
+{
+    var directory = Path.Combine(Path.GetTempPath(), $"scour-portable-test-{Guid.NewGuid():N}");
+    Directory.CreateDirectory(directory);
+    try
+    {
+        Assert(!AppRuntime.IsPortableInstallation(directory));
+        File.WriteAllText(Path.Combine(directory, AppRuntime.PortableMarkerFileName), "");
+        Assert(AppRuntime.IsPortableInstallation(directory));
+    }
+    finally
+    {
+        if (Directory.Exists(directory)) Directory.Delete(directory, recursive: true);
+    }
+});
+
 if (failures.Count > 0)
 {
     foreach (var failure in failures)

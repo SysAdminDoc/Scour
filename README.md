@@ -66,7 +66,8 @@ Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to in
 - **Finding explanations** - select a result to see the scanner rule, reason, safety state, suggested action, and path
 - **Result exclusions** - add a finding's containing folder to the persisted exclusion list directly from its context menu
 - **Scan since last run** - use the NTFS USN journal delta to scope rescans to changed paths, with a full-scan fallback when the journal is unavailable
-- **Settings persistence** - all options, window position, and excluded directories saved to `%LOCALAPPDATA%\Scour\settings.json`
+- **Settings persistence** - all options, window position, and excluded directories saved to `%LOCALAPPDATA%\Scour\settings.json` (or the portable `data` folder beside the executable)
+- **Portable mode** - place `portable.flag` beside the executable, or run from a removable drive, to keep state local and disable Explorer registry integration
 - **Windows Explorer context menu** - right-click any folder and select "Scan with Scour"
 
 ### Delete Modes

@@ -152,6 +152,8 @@ public class MainViewModel : ViewModelBase
         set => SetProperty(ref _contextMenuRegistered, value);
     }
 
+    public bool IsPortable => AppRuntime.IsPortable;
+
     public MainViewModel()
     {
         _settings = AppSettings.Load();

@@ -10,9 +10,7 @@ public sealed class PinnedResultStore
 
     public PinnedResultStore(string? path = null)
     {
-        _path = path ?? Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "Scour", "pins.json");
+        _path = path ?? Path.Combine(AppRuntime.DataDirectory, "pins.json");
         _keys = Load();
     }
 

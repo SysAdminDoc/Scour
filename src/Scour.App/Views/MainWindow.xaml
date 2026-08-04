@@ -116,6 +116,9 @@
                             <ComboBox ItemsSource="{Binding ThemeModes}" SelectedItem="{Binding ThemeMode}"
                                       Style="{StaticResource DarkComboBox}" FontSize="11" Padding="7,5"
                                       ToolTip="Switch between Catppuccin Mocha, Latte, and OLED palettes"/>
+                            <TextBlock Text="PORTABLE MODE" FontSize="9" FontWeight="Bold" Margin="4,9,0,0"
+                                       Foreground="{StaticResource GreenBrush}"
+                                       Visibility="{Binding IsPortable, Converter={StaticResource BoolToVis}}"/>
                         </StackPanel>
 
                         <!-- Settings -->
@@ -159,6 +162,7 @@
                                        Foreground="{StaticResource Overlay1Brush}"/>
                             <CheckBox Content="Explorer context menu" IsChecked="{Binding ContextMenuRegistered, Mode=OneWay}"
                                       Foreground="{StaticResource TextBrush}" Margin="4,4"
+                                      IsEnabled="{Binding IsPortable, Converter={StaticResource InvBoolToVis}}"
                                       Command="{Binding ToggleContextMenuCommand}" ToolTip="Add 'Scan with Scour' to right-click menu"/>
                         </StackPanel>
 
