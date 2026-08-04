@@ -15,7 +15,7 @@ public static class Program
 
         if (options.ShowVersion)
         {
-            Console.WriteLine(Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "0.3.0");
+            Console.WriteLine(Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "0.4.0");
             return 0;
         }
 

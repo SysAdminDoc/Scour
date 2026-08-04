@@ -1,6 +1,6 @@
 # Scour
 
-![Version](https://img.shields.io/badge/version-0.3.0-CBA6F7?style=flat-square)
+![Version](https://img.shields.io/badge/version-0.4.0-CBA6F7?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Windows-blue?style=flat-square)
 ![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)

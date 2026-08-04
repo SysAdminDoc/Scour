@@ -2,7 +2,7 @@
 
 All notable changes to Scour will be documented in this file.
 
-## Unreleased
+## [v0.4.0] - 2026-08-03
 
 - Added: Media Duplicates scanner with WIC image dHashing, bounded video perceptual buckets, container dimensions, and safe duplicate selection.
 - Added: Dependency-free executable scanner test harness with end-to-end media grouping coverage.

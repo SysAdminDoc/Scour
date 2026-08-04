@@ -54,7 +54,7 @@
                                    Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
                         <TextBlock Text="Scour" FontWeight="Bold" FontSize="14"
                                    Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
-                        <TextBlock Text="  v0.3.0" FontSize="11"
+                        <TextBlock Text="  v0.4.0" FontSize="11"
                                    Foreground="{StaticResource Overlay1Brush}" VerticalAlignment="Center"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

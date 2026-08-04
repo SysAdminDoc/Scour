@@ -11,7 +11,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>scour</AssemblyName>
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
     <AssemblyTitle>Scour CLI</AssemblyTitle>
     <Description>Command-line disk cleanup scanner for Windows</Description>
     <Company>SysAdminDoc</Company>
