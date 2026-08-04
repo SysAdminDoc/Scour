@@ -15,6 +15,7 @@ All notable changes to Scour will be documented in this file.
 - Added: Persistent MFT cache with atomic snapshots and USN-journal delta refresh with full-enumeration fallback.
 - Added: Scan-since-last-run mode in the WPF app and CLI, using changed USN paths to narrow traversal and safely falling back to a full scan.
 - Added: Portable mode detection via `portable.flag` or removable-drive execution, with local state storage and registry-free Explorer integration.
+- Added: Dependency-free Windows Terminal TUI with scan, path, preset, scanner, JSON, and report commands, plus a profile fragment.
 - Added: Optional dependency-free BLAKE3 full-hash backend for duplicate detection, selectable alongside the SHA256 default.
 - Added: Quick, Deep, and Forensic scan presets with persisted bundle selection for Scan All.
 - Added: Big Files Treemap tab with proportional folder-size layout and direct-file buckets.

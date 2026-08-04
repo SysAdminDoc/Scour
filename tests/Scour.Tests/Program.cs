@@ -688,6 +688,31 @@ Run("portable mode detects a marker without touching the registry", () =>
     }
 });
 
+Run("TUI executes a scan through the CLI engine without keyboard injection", () =>
+{
+    var root = Path.Combine(Path.GetTempPath(), $"scour-tui-test-{Guid.NewGuid():N}");
+    Directory.CreateDirectory(root);
+    try
+    {
+        File.WriteAllText(Path.Combine(root, "tui.tmp"), "tui");
+        var options = CliParser.Parse(["--tui", "--path", root, "--scanner", "Temp Files"]);
+        using var input = new StringReader("scan\nquit\n");
+        using var output = new StringWriter();
+        var exitCode = TuiRunner.RunAsync(options, input, output, TextWriter.Null)
+            .GetAwaiter()
+            .GetResult();
+
+        var text = output.ToString();
+        Assert(exitCode == 1, $"TUI exit code was {exitCode}");
+        Assert(text.Contains("Scour TUI", StringComparison.Ordinal));
+        Assert(text.Contains("tui.tmp", StringComparison.Ordinal));
+    }
+    finally
+    {
+        if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+    }
+});
+
 if (failures.Count > 0)
 {
     foreach (var failure in failures)

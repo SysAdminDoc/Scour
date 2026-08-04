@@ -14,6 +14,7 @@ public sealed record CliOptions(
     string? ScheduledTaskPath,
     string? ReportDirectory,
     bool ShowHelp,
-    bool ShowVersion);
+    bool ShowVersion,
+    bool ShowTui);
 
 public sealed class CliArgumentException(string message) : Exception(message);

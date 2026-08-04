@@ -1,0 +1,6 @@
+{
+  "name": "Scour TUI",
+  "commandline": "scour.exe --tui",
+  "startingDirectory": "%USERPROFILE%",
+  "suppressApplicationTitle": true
+}

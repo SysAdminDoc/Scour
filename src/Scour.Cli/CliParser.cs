@@ -18,6 +18,7 @@ public static class CliParser
         string? reportDirectory = null;
         var showHelp = false;
         var showVersion = false;
+        var showTui = false;
 
         for (var index = 0; index < args.Length; index++)
         {
@@ -31,6 +32,9 @@ public static class CliParser
                     break;
                 case "--version":
                     showVersion = true;
+                    break;
+                case "--tui":
+                    showTui = true;
                     break;
                 case "--json":
                     json = true;
@@ -97,7 +101,8 @@ public static class CliParser
             scheduledTaskPath,
             reportDirectory,
             showHelp,
-            showVersion);
+            showVersion,
+            showTui);
     }
 
     private static string ReadValue(string[] args, ref int index, string argument)

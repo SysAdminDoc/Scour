@@ -83,10 +83,11 @@ The self-contained `scour.exe` publish supports JSON/CSV reporting and safe unat
 scour.exe --path C:\Data --preset Deep --json --export-csv C:\Reports\scour.csv
 scour.exe --path C:\Data --scanner "Temp Files" --dry-run --quarantine-to D:\Scour-Quarantine
 scour.exe --path C:\Data --preset Deep --since-last-run --json
+scour.exe --tui --path C:\Data --preset Deep
 scour.exe --scheduled-task C:\Reports\ScourWeekly.xml --path C:\Data --report-dir C:\Reports
 ```
 
-Exit codes are `0` for no selected findings, `1` when findings are returned, and `2` for argument, scan, export, or quarantine errors. `--quarantine-to` moves selected findings outside the scan tree; add `--dry-run` to preview those moves. `--since-last-run` refreshes the persistent MFT checkpoint and uses the USN delta when valid, otherwise safely falling back to a full scan. `--scheduled-task` writes a weekly Task Scheduler XML template that drops a JSON report in the chosen report directory.
+`--tui` opens the built-in Windows Terminal interface. Use `scan`, `path <directory>`, `preset <Quick|Deep|Forensic>`, `scanner <name[,name...]>`, `json`, and `quit` at its prompt. The ready-to-import profile fragment is [`tools/scour-terminal-profile.json`](tools/scour-terminal-profile.json). Exit codes are `0` for no selected findings, `1` when findings are returned, and `2` for argument, scan, export, or quarantine errors. `--quarantine-to` moves selected findings outside the scan tree; add `--dry-run` to preview those moves. `--since-last-run` refreshes the persistent MFT checkpoint and uses the USN delta when valid, otherwise safely falling back to a full scan. `--scheduled-task` writes a weekly Task Scheduler XML template that drops a JSON report in the chosen report directory.
 
 ## Download
 

@@ -19,6 +19,9 @@ public static class Program
             return 0;
         }
 
+        if (options.ShowTui)
+            return await TuiRunner.RunAsync(options, Console.In, Console.Out, Console.Error);
+
         try
         {
             if (!string.IsNullOrWhiteSpace(options.ScheduledTaskPath))
@@ -69,6 +72,7 @@ internal static class CliHelp
                     [--scanner NAME[,NAME...]] [--json]
                     [--since-last-run] [--export-csv PATH]
                     [--quarantine-to PATH] [--dry-run]
+          scour.exe --tui [--path PATH] [--preset QUICK|DEEP|FORENSIC]
           scour.exe --scheduled-task PATH [--path PATH] [--report-dir PATH]
 
         Options:
@@ -77,6 +81,7 @@ internal static class CliHelp
           --scanner NAME          Select one or more scanner names; overrides preset
           --json                  Emit one machine-readable JSON report on stdout
           --since-last-run        Use the NTFS USN journal delta when available
+          --tui                   Open the dependency-free Windows Terminal interface
           --export-csv PATH       Write all findings to a CSV report
           --quarantine-to PATH    Move selected findings outside the scan tree
           --dry-run               Report quarantine moves without changing files
