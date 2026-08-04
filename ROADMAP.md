@@ -20,7 +20,6 @@ Future direction for Scour, a Win32/MFT-powered disk cleanup utility. Focus: mor
 
 ## Nice-to-Haves
 
-- Signed MSIX + winget manifest for `winget install SysAdminDoc.Scour`
 - Plugin manifest so third parties can ship scanners as separate DLLs dropped into `%LOCALAPPDATA%\Scour\Plugins\`
 
 ## Open-Source Research (Round 2)
