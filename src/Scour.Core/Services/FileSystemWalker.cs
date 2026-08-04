@@ -83,6 +83,8 @@ public sealed class FileSystemWalker
                 {
                     if (ShouldSkipDirectory(entry))
                         continue;
+                    if (!_config.MayContainChangedPath(entry.FullPath))
+                        continue;
                     subdirs.Add(entry);
                 }
                 else
@@ -136,7 +138,13 @@ public sealed class FileSystemWalker
                 {
                     if (ShouldSkipDirectory(entry))
                         continue;
+                    if (!_config.MayContainChangedPath(entry.FullPath))
+                        continue;
                     subdirs.Add(entry);
+                }
+                else if (!_config.IsChangedPath(entry.FullPath))
+                {
+                    continue;
                 }
 
                 await writer.WriteAsync(entry, ct);

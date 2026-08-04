@@ -159,11 +159,13 @@ public sealed class DuplicateFileScanner : ScannerBase
                     if (config.SkipHidden && entry.IsHidden) continue;
                     if (config.SkipSystem && entry.IsSystem) continue;
                     if (config.IsExcludedDirectory(entry.FullPath, entry.Name)) continue;
+                    if (!config.MayContainChangedPath(entry.FullPath)) continue;
 
                     ScanDirectory(entry.FullPath, depth + 1, config, sizeGroups, ref fileCount, progress, ct);
                 }
                 else
                 {
+                    if (!config.IsChangedPath(entry.FullPath)) continue;
                     if (entry.SizeBytes == 0) continue;
                     if (config.MinFileSizeBytes > 0 && entry.SizeBytes < config.MinFileSizeBytes) continue;
                     if (config.MaxFileSizeBytes > 0 && entry.SizeBytes > config.MaxFileSizeBytes) continue;

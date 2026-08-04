@@ -129,6 +129,7 @@ public sealed class MftCacheStore
             MftReader.MftSnapshot? snapshot = null;
             var strategy = "full MFT enumeration";
             var usedDelta = false;
+            IReadOnlyList<string>? changedPaths = null;
 
             if (cached != null &&
                 cached.DriveLetter == char.ToUpperInvariant(driveLetter) &&
@@ -147,6 +148,7 @@ public sealed class MftCacheStore
                 {
                     var entries = new Dictionary<long, MftReader.MftEntry>(cached.Entries);
                     MftReader.ApplyUsnChanges(entries, changes);
+                    changedPaths = ResolveChangedPaths(changes, cached.Entries, entries, driveLetter);
                     snapshot = new MftReader.MftSnapshot(
                         char.ToUpperInvariant(driveLetter),
                         journal.Value.JournalId,
@@ -170,7 +172,8 @@ public sealed class MftCacheStore
                 snapshot.Entries.Count,
                 strategy,
                 CachePath,
-                null);
+                null,
+                changedPaths);
         }
         catch (OperationCanceledException)
         {
@@ -225,6 +228,35 @@ public sealed class MftCacheStore
 
     private MftCacheRefreshResult Failure(string message)
         => new(false, 0, "unavailable", CachePath, message);
+
+    private static IReadOnlyList<string> ResolveChangedPaths(
+        IReadOnlyList<MftReader.UsnChange> changes,
+        Dictionary<long, MftReader.MftEntry> previousEntries,
+        Dictionary<long, MftReader.MftEntry> currentEntries,
+        char driveLetter)
+    {
+        var paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var change in changes)
+        {
+            AddPathAndParent(paths, MftReader.ResolvePath(change.FileReferenceNumber, previousEntries, driveLetter));
+            AddPathAndParent(paths, MftReader.ResolvePath(change.FileReferenceNumber, currentEntries, driveLetter));
+        }
+
+        return paths.OrderBy(path => path, StringComparer.OrdinalIgnoreCase).ToArray();
+    }
+
+    private static void AddPathAndParent(HashSet<string> paths, string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+
+        paths.Add(path);
+        var parent = Path.GetDirectoryName(path);
+        var root = Path.GetPathRoot(path);
+        if (!string.IsNullOrWhiteSpace(parent) &&
+            !string.Equals(parent, root, StringComparison.OrdinalIgnoreCase))
+            paths.Add(parent);
+    }
 }
 
 public sealed record MftCacheRefreshResult(
@@ -232,4 +264,5 @@ public sealed record MftCacheRefreshResult(
     int EntryCount,
     string Strategy,
     string CachePath,
-    string? Error);
+    string? Error,
+    IReadOnlyList<string>? ChangedPaths = null);

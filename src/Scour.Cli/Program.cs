@@ -67,7 +67,8 @@ internal static class CliHelp
         Usage:
           scour.exe [--path PATH] [--preset QUICK|DEEP|FORENSIC]
                     [--scanner NAME[,NAME...]] [--json]
-                    [--export-csv PATH] [--quarantine-to PATH] [--dry-run]
+                    [--since-last-run] [--export-csv PATH]
+                    [--quarantine-to PATH] [--dry-run]
           scour.exe --scheduled-task PATH [--path PATH] [--report-dir PATH]
 
         Options:
@@ -75,6 +76,7 @@ internal static class CliHelp
           --preset NAME           Scanner bundle (default: Forensic)
           --scanner NAME          Select one or more scanner names; overrides preset
           --json                  Emit one machine-readable JSON report on stdout
+          --since-last-run        Use the NTFS USN journal delta when available
           --export-csv PATH       Write all findings to a CSV report
           --quarantine-to PATH    Move selected findings outside the scan tree
           --dry-run               Report quarantine moves without changing files

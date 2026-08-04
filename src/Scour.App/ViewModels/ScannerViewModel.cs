@@ -222,6 +222,9 @@ public class ScannerViewModel : ViewModelBase
 
         try
         {
+            if (_scanner is ScannerBase scannerBase)
+                scannerBase.SetScanScope(BuildConfig);
+
             await _scanner.ScanAsync(BuildConfig, progressHandler, _cts.Token);
 
             // Final drain - pick up any remaining items

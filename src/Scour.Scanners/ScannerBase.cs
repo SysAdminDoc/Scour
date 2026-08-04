@@ -24,8 +24,15 @@ public abstract class ScannerBase : IScannerModule
     /// <summary>
     /// Add a result and notify the UI for real-time streaming.
     /// </summary>
+    private ScanConfig? _scanConfig;
+
+    public void SetScanScope(ScanConfig config) => _scanConfig = config;
+
     protected void AddResult(ScanResultItem item)
     {
+        if (_scanConfig != null && !_scanConfig.IsChangedPath(item.FullPath))
+            return;
+
         _results.Add(item);
         OnItemFound?.Invoke(item);
     }

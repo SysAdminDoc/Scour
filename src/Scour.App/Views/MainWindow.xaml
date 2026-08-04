@@ -128,6 +128,9 @@
                                       Foreground="{StaticResource TextBrush}" Margin="4,4"/>
                             <CheckBox Content="Ignore 0 KB files" IsChecked="{Binding Ignore0Kb}"
                                       Foreground="{StaticResource TextBrush}" Margin="4,4"/>
+                            <CheckBox Content="Scan since last run" IsChecked="{Binding ScanSinceLastRun}"
+                                      Foreground="{StaticResource TextBrush}" Margin="4,4"
+                                      ToolTip="Use the NTFS USN journal delta when available; the first run creates a baseline and unavailable journals fall back to a full scan"/>
                             <TextBlock Text="DUPLICATE FULL HASH" FontSize="9" FontWeight="Bold" Margin="4,10,0,4"
                                        Foreground="{StaticResource Overlay1Brush}"/>
                             <ComboBox ItemsSource="{Binding HashAlgorithms}" SelectedItem="{Binding FullHashAlgorithm}"

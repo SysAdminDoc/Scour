@@ -11,6 +11,7 @@ public static class CliParser
         var scannerNames = new List<string>();
         var json = false;
         var dryRun = false;
+        var sinceLastRun = false;
         string? exportCsvPath = null;
         string? quarantinePath = null;
         string? scheduledTaskPath = null;
@@ -36,6 +37,9 @@ public static class CliParser
                     break;
                 case "--dry-run":
                     dryRun = true;
+                    break;
+                case "--since-last-run":
+                    sinceLastRun = true;
                     break;
                 case "--path":
                 case "-p":
@@ -87,6 +91,7 @@ public static class CliParser
             scannerNames,
             json,
             dryRun,
+            sinceLastRun,
             exportCsvPath,
             quarantinePath,
             scheduledTaskPath,

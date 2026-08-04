@@ -15,6 +15,7 @@ namespace Scour.App.ViewModels;
 public class MainViewModel : ViewModelBase
 {
     private readonly AppSettings _settings;
+    private readonly MftCacheStore _mftCacheStore = new();
 
     public ObservableCollection<ScannerViewModel> Scanners { get; } = [];
 
@@ -93,6 +94,17 @@ public class MainViewModel : ViewModelBase
     public IReadOnlyList<ScanPreset> ScanPresets => ScanPresetCatalog.Presets;
     public string ScanPresetDescription => ScanPresetCatalog.GetDefinition(ScanPreset).Description;
 
+    private bool _scanSinceLastRun;
+    public bool ScanSinceLastRun
+    {
+        get => _scanSinceLastRun;
+        set
+        {
+            if (SetProperty(ref _scanSinceLastRun, value))
+                _settings.ScanSinceLastRun = value;
+        }
+    }
+
     private ThemeMode _themeMode = ThemeMode.Mocha;
     public ThemeMode ThemeMode
     {
@@ -152,6 +164,7 @@ public class MainViewModel : ViewModelBase
         _ignore0Kb = _settings.Ignore0Kb;
         _fullHashAlgorithm = _settings.FullHashAlgorithm;
         _scanPreset = _settings.ScanPreset;
+        _scanSinceLastRun = _settings.ScanSinceLastRun;
         _themeMode = _settings.ThemeMode;
         _deleteMode = _settings.DeleteMode;
 
@@ -232,7 +245,7 @@ public class MainViewModel : ViewModelBase
         _settings.Save();
     }
 
-    private ScanConfig BuildConfig() => new()
+    private ScanConfig BuildConfig(IReadOnlySet<string>? changedPaths = null) => new()
     {
         RootPath = RootPath,
         MaxDepth = MaxDepth,
@@ -241,7 +254,52 @@ public class MainViewModel : ViewModelBase
         Ignore0KbFiles = Ignore0Kb,
         ExcludedDirectories = [.. ExcludedDirectories],
         IgnoreFiles = [.. _settings.IgnoreFiles],
+        ChangedPaths = changedPaths,
     };
+
+    private async Task<ScanConfig> BuildScanConfigAsync(ScannerViewModel statusScanner)
+    {
+        if (!ScanSinceLastRun)
+            return BuildConfig();
+
+        var driveLetter = TryGetDriveLetter(RootPath);
+        if (driveLetter == null)
+        {
+            statusScanner.StatusText = "USN journal unavailable for this path; running a full scan";
+            return BuildConfig();
+        }
+
+        var progress = new Progress<ScanProgress>(value =>
+            statusScanner.StatusText = $"USN index: {value.Status}");
+        var refresh = await _mftCacheStore.RefreshAsync(driveLetter.Value, progress, CancellationToken.None);
+        if (!refresh.UsedDelta)
+        {
+            statusScanner.StatusText = refresh.Error == null
+                ? "MFT baseline refreshed; running a full scan"
+                : $"USN journal unavailable ({refresh.Error}); running a full scan";
+            return BuildConfig();
+        }
+
+        var changedPaths = refresh.ChangedPaths?.ToHashSet(StringComparer.OrdinalIgnoreCase) ??
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        statusScanner.StatusText = $"USN delta: {changedPaths.Count:N0} changed paths";
+        return BuildConfig(changedPaths);
+    }
+
+    private static char? TryGetDriveLetter(string path)
+    {
+        try
+        {
+            var root = Path.GetPathRoot(path);
+            return root is { Length: >= 2 } && char.IsLetter(root[0]) && root[1] == ':'
+                ? char.ToUpperInvariant(root[0])
+                : null;
+        }
+        catch (ArgumentException)
+        {
+            return null;
+        }
+    }
 
     private void ApplyHashAlgorithm()
     {
@@ -274,13 +332,17 @@ public class MainViewModel : ViewModelBase
     private async Task DoScanActive(object? _)
     {
         if (ActiveScanner == null) return;
-        ActiveScanner.BuildConfig = BuildConfig();
+        ActiveScanner.BuildConfig = await BuildScanConfigAsync(ActiveScanner);
         await ActiveScanner.RunScanAsync();
     }
 
     private async Task DoScanAll(object? _)
     {
-        var config = BuildConfig();
+        var statusScanner = Scanners.FirstOrDefault(scanner => ScanPresetCatalog.Includes(ScanPreset, scanner.Name))
+            ?? ActiveScanner;
+        if (statusScanner == null) return;
+
+        var config = await BuildScanConfigAsync(statusScanner);
         var tasks = new List<Task>();
         foreach (var scanner in Scanners.Where(scanner => ScanPresetCatalog.Includes(ScanPreset, scanner.Name)))
         {

@@ -53,10 +53,12 @@ public sealed class OldFileScanner : ScannerBase
                     if (config.SkipHidden && entry.IsHidden) continue;
                     if (config.SkipSystem && entry.IsSystem) continue;
                     if (config.IsExcludedDirectory(entry.FullPath, entry.Name)) continue;
+                    if (!config.MayContainChangedPath(entry.FullPath)) continue;
                     ScanDir(entry.FullPath, depth + 1, config, cutoff, ref scanned, progress, ct);
                 }
                 else
                 {
+                    if (!config.IsChangedPath(entry.FullPath)) continue;
                     scanned++;
                     if (scanned % 1000 == 0)
                         progress.Report(new ScanProgress($"Scanning: {path}", scanned, 0, true));

@@ -65,6 +65,7 @@ Built with C# .NET 9 + WPF. Catppuccin Mocha dark theme. Zero dependencies to in
 - **Result pinning** - pin important findings from the context menu and keep them marked across rescans
 - **Finding explanations** - select a result to see the scanner rule, reason, safety state, suggested action, and path
 - **Result exclusions** - add a finding's containing folder to the persisted exclusion list directly from its context menu
+- **Scan since last run** - use the NTFS USN journal delta to scope rescans to changed paths, with a full-scan fallback when the journal is unavailable
 - **Settings persistence** - all options, window position, and excluded directories saved to `%LOCALAPPDATA%\Scour\settings.json`
 - **Windows Explorer context menu** - right-click any folder and select "Scan with Scour"
 
@@ -80,10 +81,11 @@ The self-contained `scour.exe` publish supports JSON/CSV reporting and safe unat
 ```powershell
 scour.exe --path C:\Data --preset Deep --json --export-csv C:\Reports\scour.csv
 scour.exe --path C:\Data --scanner "Temp Files" --dry-run --quarantine-to D:\Scour-Quarantine
+scour.exe --path C:\Data --preset Deep --since-last-run --json
 scour.exe --scheduled-task C:\Reports\ScourWeekly.xml --path C:\Data --report-dir C:\Reports
 ```
 
-Exit codes are `0` for no selected findings, `1` when findings are returned, and `2` for argument, scan, export, or quarantine errors. `--quarantine-to` moves selected findings outside the scan tree; add `--dry-run` to preview those moves. `--scheduled-task` writes a weekly Task Scheduler XML template that drops a JSON report in the chosen report directory.
+Exit codes are `0` for no selected findings, `1` when findings are returned, and `2` for argument, scan, export, or quarantine errors. `--quarantine-to` moves selected findings outside the scan tree; add `--dry-run` to preview those moves. `--since-last-run` refreshes the persistent MFT checkpoint and uses the USN delta when valid, otherwise safely falling back to a full scan. `--scheduled-task` writes a weekly Task Scheduler XML template that drops a JSON report in the chosen report directory.
 
 ## Download
 

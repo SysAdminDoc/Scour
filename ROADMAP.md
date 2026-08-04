@@ -20,7 +20,6 @@ Future direction for Scour, a Win32/MFT-powered disk cleanup utility. Focus: mor
 
 ## Nice-to-Haves
 
-- "Scan since last run" mode via USN journal delta (only files changed since last scan)
 - Portable mode detection (no registry writes if launched from removable drive)
 - Windows Terminal `scour` profile with a built-in TUI alternative to the WPF GUI
 - Signed MSIX + winget manifest for `winget install SysAdminDoc.Scour`

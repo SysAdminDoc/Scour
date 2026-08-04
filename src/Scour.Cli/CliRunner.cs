@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using Scour.Core;
 using Scour.Core.Interfaces;
+using Scour.Core.Services;
 using Scour.Scanners;
 
 namespace Scour.Cli;
@@ -46,17 +47,53 @@ public static class CliRunner
         var errors = new List<string>();
         var scannerReports = new List<CliScannerReport>();
         var items = new List<CliItemReport>();
+        IReadOnlySet<string>? changedPaths = null;
+        var scanStrategy = "full scan";
+
+        if (options.SinceLastRun)
+        {
+            var driveLetter = TryGetDriveLetter(rootPath);
+            if (driveLetter == null)
+            {
+                progressWriter?.WriteLine("[Incremental] USN journal unavailable for this path; using a full scan.");
+            }
+            else
+            {
+                var indexProgress = new Progress<ScanProgress>(value =>
+                {
+                    if (progressWriter != null && (value.IsIndeterminate || value.Total > 0))
+                        progressWriter.WriteLine($"[Incremental] {value.Status}");
+                });
+                var refresh = await new MftCacheStore().RefreshAsync(driveLetter.Value, indexProgress, ct);
+                if (refresh.UsedDelta)
+                {
+                    changedPaths = refresh.ChangedPaths?.ToHashSet(StringComparer.OrdinalIgnoreCase) ??
+                        new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    scanStrategy = "USN journal delta";
+                    progressWriter?.WriteLine($"[Incremental] {changedPaths.Count:N0} changed paths selected.");
+                }
+                else
+                {
+                    scanStrategy = refresh.Error == null ? "full scan (MFT baseline)" : "full scan (USN unavailable)";
+                    progressWriter?.WriteLine($"[Incremental] {scanStrategy}; continuing safely.");
+                }
+            }
+        }
+
         var config = new ScanConfig
         {
             RootPath = rootPath,
             SkipSystem = true,
             SkipHidden = false,
             Ignore0KbFiles = true,
+            ChangedPaths = changedPaths,
         };
 
         foreach (var module in selectedModules)
         {
             ct.ThrowIfCancellationRequested();
+            if (module is ScannerBase scannerBase)
+                scannerBase.SetScanScope(config);
             var progress = new Progress<ScanProgress>(value =>
             {
                 if (progressWriter != null && (value.IsIndeterminate || value.Total > 0))
@@ -115,6 +152,8 @@ public static class CliRunner
             Items = items,
             Actions = actions,
             Errors = errors,
+            SinceLastRun = options.SinceLastRun,
+            ScanStrategy = scanStrategy,
             SelectedCount = selectedCount,
             SelectedSizeBytes = selectedSize,
             ExitCode = exitCode,
@@ -128,6 +167,7 @@ public static class CliRunner
     {
         output.WriteLine($"Scour scan: {result.RootPath}");
         output.WriteLine($"Preset: {result.Preset}; scanners: {result.ScannerReports.Count}");
+        output.WriteLine($"Mode: {result.ScanStrategy}");
         output.WriteLine($"Findings: {result.Items.Count}; selected: {result.SelectedCount} ({FormatSize(result.SelectedSizeBytes)})");
         foreach (var action in result.Actions)
             output.WriteLine($"{action.Status}: {action.SourcePath} -> {action.TargetPath}");
@@ -158,6 +198,21 @@ public static class CliRunner
         if (unknown.Count > 0)
             throw new CliArgumentException($"Unknown scanner(s): {string.Join(", ", unknown)}. Use --help to list names.");
         return selected;
+    }
+
+    private static char? TryGetDriveLetter(string path)
+    {
+        try
+        {
+            var root = Path.GetPathRoot(path);
+            return root is { Length: >= 2 } && char.IsLetter(root[0]) && root[1] == ':'
+                ? char.ToUpperInvariant(root[0])
+                : null;
+        }
+        catch (ArgumentException)
+        {
+            return null;
+        }
     }
 
     private static void QuarantineSelected(
@@ -285,6 +340,8 @@ public sealed class CliExecutionResult
     public IReadOnlyList<CliItemReport> Items { get; init; } = [];
     public IReadOnlyList<CliActionReport> Actions { get; init; } = [];
     public IReadOnlyList<string> Errors { get; init; } = [];
+    public bool SinceLastRun { get; init; }
+    public string ScanStrategy { get; init; } = "full scan";
     public int SelectedCount { get; init; }
     public long SelectedSizeBytes { get; init; }
     public int ExitCode { get; init; }

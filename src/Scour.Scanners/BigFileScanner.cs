@@ -83,6 +83,7 @@ public sealed class BigFileScanner : ScannerBase
                     if (config.SkipHidden && entry.IsHidden) continue;
                     if (config.SkipSystem && entry.IsSystem) continue;
                     if (config.IsExcludedDirectory(entry.FullPath, entry.Name)) continue;
+                    if (!config.MayContainChangedPath(entry.FullPath)) continue;
                     var child = new FolderSizeNode(entry.Name, entry.FullPath);
                     var childSize = ScanDir(entry.FullPath, depth + 1, config, heap, ref scanned, child, progress, ct);
                     if (childSize > 0)
@@ -94,6 +95,7 @@ public sealed class BigFileScanner : ScannerBase
                 }
                 else
                 {
+                    if (!config.IsChangedPath(entry.FullPath)) continue;
                     scanned++;
                     if (scanned % 1000 == 0)
                         progress.Report(new ScanProgress($"Scanning: {path}", scanned, 0, true));

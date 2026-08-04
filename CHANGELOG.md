@@ -13,6 +13,7 @@ All notable changes to Scour will be documented in this file.
 - Added: VHDX Bloat scanner for Docker Desktop and WSL virtual disks with protected Optimize-VHD compaction.
 - Added: Read-only Recycle Bin scanner with per-volume metadata, original paths, deletion times, and SID resolution.
 - Added: Persistent MFT cache with atomic snapshots and USN-journal delta refresh with full-enumeration fallback.
+- Added: Scan-since-last-run mode in the WPF app and CLI, using changed USN paths to narrow traversal and safely falling back to a full scan.
 - Added: Optional dependency-free BLAKE3 full-hash backend for duplicate detection, selectable alongside the SHA256 default.
 - Added: Quick, Deep, and Forensic scan presets with persisted bundle selection for Scan All.
 - Added: Big Files Treemap tab with proportional folder-size layout and direct-file buckets.

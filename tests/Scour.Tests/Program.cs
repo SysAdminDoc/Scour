@@ -639,6 +639,39 @@ Run("directory exclusions match exact paths without hiding same-named folders", 
     }
 });
 
+Run("USN delta scope limits recursive scanners to changed paths", () =>
+{
+    var root = Path.Combine(Path.GetTempPath(), $"scour-delta-test-{Guid.NewGuid():N}");
+    Directory.CreateDirectory(root);
+    var changed = Path.Combine(root, "changed.tmp");
+    var unchanged = Path.Combine(root, "unchanged.tmp");
+    try
+    {
+        File.WriteAllText(changed, "changed");
+        File.WriteAllText(unchanged, "unchanged");
+
+        var scanner = new TempFileScanner();
+        var config = new ScanConfig
+        {
+            RootPath = root,
+            SkipSystem = false,
+            ChangedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { changed }
+        };
+        scanner.SetScanScope(config);
+        scanner.ScanAsync(config, new Progress<Scour.Core.Interfaces.ScanProgress>(), CancellationToken.None)
+            .GetAwaiter()
+            .GetResult();
+
+        Assert(scanner.Results.Count == 1, $"result count was {scanner.Results.Count}");
+        Assert(scanner.Results[0].FullPath.Equals(changed, StringComparison.OrdinalIgnoreCase));
+        Assert(CliParser.Parse(["--since-last-run"]).SinceLastRun);
+    }
+    finally
+    {
+        if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+    }
+});
+
 if (failures.Count > 0)
 {
     foreach (var failure in failures)

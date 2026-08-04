@@ -8,6 +8,7 @@ public sealed record CliOptions(
     IReadOnlyList<string> ScannerNames,
     bool Json,
     bool DryRun,
+    bool SinceLastRun,
     string? ExportCsvPath,
     string? QuarantinePath,
     string? ScheduledTaskPath,
