@@ -1,48 +1,5 @@
 # Scour Roadmap
 
-Future direction for Scour, a Win32/MFT-powered disk cleanup utility. Focus: more scanner coverage, smarter dedup, and enterprise/CLI friendliness.
+Actionable work only. Historical and completed roadmap material is archived in CHANGELOG.md; blocked work is kept in Roadmap_Blocked.md.
 
-## Planned Features
-
-### New scanners
-### Engine & performance
-
-### CLI, automation, scripting
-
-### UI/UX
-
-## Competitive Research
-
-- **WizTree** uses MFT scan + treemap; one-pane visual drilldown is the killer feature - add treemap as a dedicated view on top of the existing Big Files scanner.
-- **BleachBit / CCleaner** ship shipped-cleaner lists (per-app junk locations) and community-maintained profile trees; Scour can add a YAML-driven "app junk" scanner so community PRs don't require C# changes.
-- **TreeSize Free** exposes NTFS compression ratio + allocated-vs-logical size columns; valuable signal for sparse files and compressed archives.
-- **PatchMyPC / Dell DCU** style enterprise runs: JSON exit reports + event-log writes are table-stakes for RMM adoption - align with SystemUpdatePro's `update_history.json` format.
-
-## Nice-to-Haves
-
-
-## Open-Source Research (Round 2)
-
-### Related OSS Projects
-- https://github.com/Eul45/omni-search — Tauri + Rust + C++, USN/MFT direct scanning with live USN-journal incremental updates, duplicate finder, Recycle-Bin delete flow
-- https://github.com/windirstat/windirstat — GPLv2 classic treemap, extension statistics view
-- https://sourceforge.net/projects/doublefile/ — Double File, project-based duplicate DB with stored checksums
-- https://github.com/shundhammer/qdirstat — Qt KDirStat port, cleanup action framework (run external commands on selected paths)
-- https://github.com/qarmin/czkawka — Rust multi-platform duplicate/empty/broken finder, very fast, good UX reference
-- https://github.com/arsenetar/dupeguru — Python fuzzy dup (filename, audio tags, image similarity) — borrows for content-class matches
-- https://github.com/topics/disk-cleanup — Topic hub
-
-### Features to Borrow
-- USN-journal live incremental index so reopening the app refreshes in milliseconds (omni-search — you already plan this, make it the default)
-- Extension statistics / treemap cross-view — WinDirStat's killer feature that Scour currently lacks
-- Cleanup-action framework (qdirstat) — right-click a folder, run a user-defined shell command with `%p` substitution (e.g., "run CCleaner on this branch")
-- Fuzzy/perceptual image dup detection via pHash for similar-not-identical photos (dupeguru)
-- Audio-tag dup detection (artist+title+length match rather than byte-match) (dupeguru)
-- Project-based checksum DB so offline drives can still be de-duped against online ones (Double File)
-- Czkawka-style "cache similar results" so re-running a scan with a filter tweak doesn't rehash (czkawka)
-
-### Patterns & Architectures Worth Studying
-- DeviceIoControl + FSCTL_ENUM_USN_DATA enumeration over filesystem walk (omni-search / WizTree) — 20-100x faster, need Admin + `\.\C:` access, handle unopenable-volume error by falling back to walk
-- 3-phase dup detection (size -> partial 4KB hash -> full hash) is industry standard; czkawka adds a 4th phase (blake3 streaming) for cancelable long ops
-- Treemap renderer as a separate widget fed by size tree (WinDirStat abstraction) — reusable across Scour's scanner types
-- Per-scanner plugin ABI (interface + .dll discovery in `%LOCALAPPDATA%\Scour\Plugins\`) — czkawka's Rust trait system is a good mental model for a C# IScanner interface
+No actionable roadmap items remain.
